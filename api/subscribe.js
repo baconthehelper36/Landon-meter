@@ -18,7 +18,11 @@ module.exports = async (req, res) => {
             });
         }
 
-        if (username !== "landon" && username !== "mama") {
+        if (
+            username !== "landon" &&
+            username !== "mama" &&
+            username !== "system"
+        ) {
             return res.status(400).json({
                 error: "Invalid username"
             });
@@ -53,7 +57,10 @@ module.exports = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Subscription error:", error);
+        console.error(
+            "Subscription error:",
+            error
+        );
 
         return res.status(500).json({
             error: "Failed to register device"
