@@ -1,194 +1,554 @@
-const { Redis } = require("@upstash/redis");
 const webpush = require("web-push");
 
-const redis = Redis.fromEnv();
-
 webpush.setVapidDetails(
-    "mailto:admin@example.com",
+    "https://example.com",
     process.env.VAPID_PUBLIC_KEY,
     process.env.VAPID_PRIVATE_KEY
 );
 
-module.exports = async (req, res) => {
-    if (req.method !== "GET" && req.method !== "POST") {
-        return res.status(405).json({
-            error: "Method not allowed"
-        });
+const REDIS_URL =
+    process.env.KV_REST_API_URL ||
+    process.env.REDIS_URL;
+
+const REDIS_TOKEN =
+    process.env.KV_REST_API_TOKEN;
+
+async function redisCommand(command) {
+
+    const response = await fetch(
+        REDIS_URL,
+        {
+            method: "POST",
+
+            headers: {
+                "Authorization":
+                    "Bearer " + REDIS_TOKEN,
+
+                "Content-Type":
+                    "application/json"
+            },
+
+            body: JSON.stringify(command)
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || data.error) {
+        throw new Error(
+            data.error ||
+            "Redis request failed"
+        );
     }
 
-    try {
-        const now = new Date();
+    return data.result;
+}
 
-        // Indonesia Western Time (WIB / UTC+7)
-        const indonesiaTime = new Date(
-            now.toLocaleString("en-US", {
-                timeZone: "Asia/Jakarta"
-            })
+
+async function getRedis(key) {
+
+    const result =
+        await redisCommand([
+            "GET",
+            key
+        ]);
+
+    if (!result) {
+        return null;
+    }
+
+    return JSON.parse(result);
+}
+
+
+async function setRedis(key, value) {
+
+    await redisCommand([
+        "SET",
+        key,
+        JSON.stringify(value)
+    ]);
+}
+
+
+async function getSubscriptions(username) {
+
+    return (
+        await getRedis(
+            "push:" + username
+        )
+    ) || [];
+}
+
+
+async function sendPush(
+    username,
+    notification
+) {
+
+    const subscriptions =
+        await getSubscriptions(
+            username
         );
 
-        const hour = indonesiaTime.getHours();
-        const minute = indonesiaTime.getMinutes();
-        const day = indonesiaTime.getDay();
+    const results = [];
 
-        let notification = null;
+    for (
+        const subscription
+        of subscriptions
+    ) {
 
-        // Monday = 1
-        // Tuesday = 2
-        // Wednesday = 3
-        // Thursday = 4
-        // Friday = 5
+        try {
 
-        // 5:50 AM - Breakfast
-        if (hour === 5 && minute === 50) {
-            notification = {
-                type: "food",
-                recipient: "landon",
-                title: "Breakfast",
-                body: "Did you eat breakfast yet?",
-                mamaTitle: "Send Notification to Landon",
-                mamaBody: "Did Landon Eat Breakfast Yet?"
-            };
+            await webpush.sendNotification(
+                subscription,
+                JSON.stringify({
+
+                    title:
+                        notification.title,
+
+                    body:
+                        notification.body,
+
+                    tag:
+                        notification.id,
+
+                    url:
+                        "/"
+
+                })
+            );
+
+            results.push({
+                success: true
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Push error:",
+                error.message
+            );
+
+            results.push({
+                success: false,
+                error:
+                    error.message
+            });
+
         }
 
-        // Monday 12:00 PM - Extracurricular reminder
-        if (day === 1 && hour === 12 && minute === 0) {
-            notification = {
-                type: "reminder",
-                recipient: "mama",
-                title: "Extracurricular Reminder",
-                body: "Landon has extracurricular activities. He might be eating late. Make sure he doesn't eat anything sour, such as tomato sauce, etc."
-            };
+    }
+
+    return results;
+}
+
+
+function getIndonesiaTime() {
+
+    const parts =
+        new Intl.DateTimeFormat(
+            "en-US",
+            {
+                timeZone:
+                    "Asia/Jakarta",
+
+                weekday:
+                    "short",
+
+                hour:
+                    "2-digit",
+
+                minute:
+                    "2-digit",
+
+                hour12:
+                    false
+            }
+        ).formatToParts(
+            new Date()
+        );
+
+    const result = {};
+
+    for (
+        const part of parts
+    ) {
+
+        result[
+            part.type
+        ] = part.value;
+
+    }
+
+    return result;
+}
+
+
+function createFoodNotification(
+    type
+) {
+
+    const titles = {
+
+        breakfast:
+            "Did you eat breakfast yet?",
+
+        lunch:
+            "Did you eat lunch yet?",
+
+        dinner:
+            "Did you eat dinner yet?"
+
+    };
+
+    const mamaTitles = {
+
+        breakfast:
+            "Send Notification to Landon",
+
+        lunch:
+            "Send Notification to Landon",
+
+        dinner:
+            "Send Notification to Landon"
+
+    };
+
+    const mamaBodies = {
+
+        breakfast:
+            "Did Landon Eat Breakfast Yet?",
+
+        lunch:
+            "Did Landon Eat Lunch Yet?",
+
+        dinner:
+            "Did Landon Eat Dinner Yet?"
+
+    };
+
+    const id =
+        type +
+        "-" +
+        Date.now();
+
+    return {
+
+        id,
+
+        type:
+            "food",
+
+        recipient:
+            "landon",
+
+        title:
+            titles[type],
+
+        body:
+            titles[type],
+
+        mamaTitle:
+            mamaTitles[type],
+
+        mamaBody:
+            mamaBodies[type],
+
+        answer:
+            null,
+
+        food:
+            null,
+
+        createdAt:
+            new Date().toISOString()
+
+    };
+
+}
+
+
+async function createNotification(
+    notification
+) {
+
+    const notifications =
+        (
+            await getRedis(
+                "notifications"
+            )
+        ) || [];
+
+    notifications.push(
+        notification
+    );
+
+    const recent =
+        notifications.slice(
+            -100
+        );
+
+    await setRedis(
+        "notifications",
+        recent
+    );
+
+    return recent;
+}
+
+
+async function sendFoodNotification(
+    type
+) {
+
+    const notification =
+        createFoodNotification(
+            type
+        );
+
+    await createNotification(
+        notification
+    );
+
+    await sendPush(
+        "landon",
+        notification
+    );
+
+    return notification;
+}
+
+
+async function sendMondayReminder() {
+
+    const notification = {
+
+        id:
+            "monday-reminder-" +
+            Date.now(),
+
+        type:
+            "reminder",
+
+        recipient:
+            "mama",
+
+        title:
+            "Extracurricular Reminder",
+
+        body:
+            "Landon has extracurricular activities and might be eating late. Make sure he doesn't eat anything sour such as tomato sauce, etc.",
+
+        createdAt:
+            new Date().toISOString()
+
+    };
+
+    await createNotification(
+        notification
+    );
+
+    await sendPush(
+        "mama",
+        notification
+    );
+
+    return notification;
+}
+
+
+module.exports = async (
+    req,
+    res
+) => {
+
+    try {
+
+        /*
+         * SYSTEM TEST MODE
+         *
+         * Example:
+         * /api/notifications?test=dinner
+         */
+
+        const test =
+            req.query &&
+            req.query.test;
+
+        if (test) {
+
+            if (
+                test !== "breakfast" &&
+                test !== "lunch" &&
+                test !== "dinner"
+            ) {
+
+                return res.status(400).json({
+
+                    error:
+                        "Test must be breakfast, lunch, or dinner."
+
+                });
+
+            }
+
+            const notification =
+                await sendFoodNotification(
+                    test
+                );
+
+            return res.status(200).json({
+
+                success:
+                    true,
+
+                test:
+                    true,
+
+                notification
+
+            });
+
         }
 
-        // Tuesday-Friday 12:00 PM - Lunch
+
+        /*
+         * AUTOMATIC SCHEDULE
+         */
+
+        const time =
+            getIndonesiaTime();
+
+        const weekday =
+            time.weekday;
+
+        const hour =
+            Number(time.hour);
+
+        const minute =
+            Number(time.minute);
+
+        let notification =
+            null;
+
+
+        /*
+         * Monday-Friday
+         * 5:50 AM
+         */
+
+        const weekdayNumber =
+            {
+                Mon: 1,
+                Tue: 2,
+                Wed: 3,
+                Thu: 4,
+                Fri: 5,
+                Sat: 6,
+                Sun: 0
+            }[weekday];
+
+
         if (
-            day >= 2 &&
-            day <= 5 &&
+            weekdayNumber >= 1 &&
+            weekdayNumber <= 5 &&
+            hour === 5 &&
+            minute === 50
+        ) {
+
+            notification =
+                await sendFoodNotification(
+                    "breakfast"
+                );
+
+        }
+
+
+        /*
+         * Monday
+         * 12:00 PM
+         */
+
+        else if (
+            weekdayNumber === 1 &&
             hour === 12 &&
             minute === 0
         ) {
-            notification = {
-                type: "food",
-                recipient: "landon",
-                title: "Lunch",
-                body: "Did you eat lunch yet?",
-                mamaTitle: "Send Notification to Landon",
-                mamaBody: "Did Landon Eat Lunch Yet?"
-            };
+
+            notification =
+                await sendMondayReminder();
+
         }
 
-        // 7:00 PM - Dinner
-        if (hour === 19 && minute === 0) {
-            notification = {
-                type: "food",
-                recipient: "landon",
-                title: "Dinner",
-                body: "Did you eat dinner yet?",
-                mamaTitle: "Send Notification to Landon",
-                mamaBody: "Did Landon Eat Dinner Yet?"
-            };
+
+        /*
+         * Tuesday-Friday
+         * 12:00 PM
+         */
+
+        else if (
+            weekdayNumber >= 2 &&
+            weekdayNumber <= 5 &&
+            hour === 12 &&
+            minute === 0
+        ) {
+
+            notification =
+                await sendFoodNotification(
+                    "lunch"
+                );
+
         }
 
-        if (!notification) {
-            return res.status(200).json({
-                sent: false,
-                message: "No scheduled notification right now."
-            });
+
+        /*
+         * Monday-Friday
+         * 7:00 PM
+         */
+
+        else if (
+            weekdayNumber >= 1 &&
+            weekdayNumber <= 5 &&
+            hour === 19 &&
+            minute === 0
+        ) {
+
+            notification =
+                await sendFoodNotification(
+                    "dinner"
+                );
+
         }
 
-        // Create a unique notification ID
-        const notificationId =
-            `${notification.type}-${Date.now()}`;
-
-        const record = {
-            id: notificationId,
-            ...notification,
-            createdAt: new Date().toISOString(),
-            answer: null
-        };
-
-        // Save notification to Redis
-        await redis.set(
-            `notification:${notificationId}`,
-            record
-        );
-
-        // Add to notification history
-        await redis.lpush(
-            "notifications",
-            record
-        );
-
-        // Keep the history from growing forever
-        await redis.ltrim(
-            "notifications",
-            0,
-            99
-        );
-
-        // Send to Landon's devices
-        if (notification.recipient === "landon") {
-            const subscriptions =
-                await redis.get("push:landon") || [];
-
-            for (const subscription of subscriptions) {
-                try {
-                    await webpush.sendNotification(
-                        subscription,
-                        JSON.stringify({
-                            title: notification.title,
-                            body: notification.body,
-                            tag: notificationId,
-                            url: "/"
-                        })
-                    );
-                } catch (error) {
-                    console.error(
-                        "Failed to send push notification:",
-                        error
-                    );
-                }
-            }
-        }
-
-        // Send Mama's reminder
-        if (notification.recipient === "mama") {
-            const subscriptions =
-                await redis.get("push:mama") || [];
-
-            for (const subscription of subscriptions) {
-                try {
-                    await webpush.sendNotification(
-                        subscription,
-                        JSON.stringify({
-                            title: notification.title,
-                            body: notification.body,
-                            tag: notificationId,
-                            url: "/"
-                        })
-                    );
-                } catch (error) {
-                    console.error(
-                        "Failed to send Mama push notification:",
-                        error
-                    );
-                }
-            }
-        }
 
         return res.status(200).json({
-            sent: true,
-            notification: record
+
+            success:
+                true,
+
+            sent:
+                !!notification,
+
+            notification
+
         });
 
     } catch (error) {
+
         console.error(
             "Notification system error:",
             error
         );
 
         return res.status(500).json({
-            error: "Notification system error"
+
+            error:
+                error.message ||
+                "Notification system error"
+
         });
+
     }
+
 };
