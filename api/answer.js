@@ -1,267 +1,746 @@
+const webpush = require("web-push");
 const { Redis } = require("@upstash/redis");
 
 const redis = Redis.fromEnv();
 
-module.exports = async (req, res) => {
-    if (req.method !== "POST") {
-        return res.status(405).json({
-            error: "Method not allowed"
-        });
+
+/* =========================
+   VAPID CONFIGURATION
+========================= */
+
+webpush.setVapidDetails(
+    "https://example.com",
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+);
+
+
+/* =========================
+   SEND PUSH TO USER
+========================= */
+
+async function sendPush(
+    username,
+    notification
+) {
+
+    const subscriptions =
+        await redis.get(
+            `push:${username}`
+        ) || [];
+
+
+    for (
+        const subscription
+        of subscriptions
+    ) {
+
+        try {
+
+            await webpush.sendNotification(
+                subscription,
+
+                JSON.stringify({
+
+                    title:
+                        notification.title,
+
+                    body:
+                        notification.body,
+
+                    tag:
+                        notification.id,
+
+                    url:
+                        "/"
+
+                })
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Push error for " +
+                username +
+                ":",
+                error.message
+            );
+
+        }
+
     }
 
+}
+
+
+/* =========================
+   MAIN API
+========================= */
+
+module.exports = async (
+    req,
+    res
+) => {
+
+    if (req.method !== "POST") {
+
+        return res.status(
+            405
+        ).json({
+
+            error:
+                "Method not allowed"
+
+        });
+
+    }
+
+
     try {
+
         const {
             username,
             notificationId,
             answer,
-            food
+            food,
+            action
         } = req.body;
 
-        if (!username || !notificationId || !answer) {
-            return res.status(400).json({
-                error: "Missing required information"
-            });
-        }
-
-        // Mama is the person who answers the food question
-        if (username !== "mama") {
-            return res.status(403).json({
-                error: "Only Mama can answer these notifications"
-            });
-        }
-
-        if (answer !== "Yes" && answer !== "No") {
-            return res.status(400).json({
-                error: "Answer must be Yes or No"
-            });
-        }
 
         if (
-            answer === "Yes" &&
-            (!food || !String(food).trim())
+            !username ||
+            !notificationId
         ) {
-            return res.status(400).json({
-                error: "Please enter what Landon ate"
+
+            return res.status(
+                400
+            ).json({
+
+                error:
+                    "Missing required information"
+
             });
+
         }
 
-        const notifications = await redis.lrange(
-            "notifications",
-            0,
-            99
-        );
 
-        let found = false;
-        let originalNotification = null;
+        /* =========================
+           FIND NOTIFICATION
+        ========================= */
 
-        for (let i = 0; i < notifications.length; i++) {
+        const notifications =
+            await redis.lrange(
+                "notifications",
+                0,
+                99
+            );
 
-            let notification = notifications[i];
 
-            if (typeof notification === "string") {
-                try {
-                    notification = JSON.parse(notification);
-                } catch {
-                    continue;
-                }
-            }
+        let foundIndex =
+            -1;
+
+        let notification =
+            null;
+
+
+        for (
+            let i = 0;
+            i < notifications.length;
+            i++
+        ) {
+
+            let item =
+                notifications[i];
+
 
             if (
-                notification.id !==
+                typeof item ===
+                "string"
+            ) {
+
+                try {
+
+                    item =
+                        JSON.parse(
+                            item
+                        );
+
+                } catch {
+
+                    continue;
+
+                }
+
+            }
+
+
+            if (
+                item.id ===
                 notificationId
             ) {
-                continue;
+
+                foundIndex =
+                    i;
+
+                notification =
+                    item;
+
+                break;
+
             }
+
+        }
+
+
+        if (
+            foundIndex === -1 ||
+            !notification
+        ) {
+
+            return res.status(
+                404
+            ).json({
+
+                error:
+                    "Notification not found"
+
+            });
+
+        }
+
+
+        /* =========================
+           MAMA ANSWERS
+        ========================= */
+
+        if (
+            username === "mama"
+        ) {
 
             if (
                 notification.type !==
                 "food"
             ) {
-                return res.status(400).json({
+
+                return res.status(
+                    400
+                ).json({
+
                     error:
                         "This notification cannot be answered"
+
                 });
+
             }
+
 
             if (
                 notification.recipient !==
                 "mama"
             ) {
-                return res.status(403).json({
+
+                return res.status(
+                    403
+                ).json({
+
                     error:
-                        "This food notification is not assigned to Mama"
+                        "This notification belongs to another user"
+
                 });
+
             }
 
-            if (notification.answer) {
-                return res.status(400).json({
+
+            if (
+                notification.answer
+            ) {
+
+                return res.status(
+                    400
+                ).json({
+
                     error:
                         "This notification has already been answered"
+
                 });
+
             }
+
+
+            if (
+                answer !== "Yes" &&
+                answer !== "No"
+            ) {
+
+                return res.status(
+                    400
+                ).json({
+
+                    error:
+                        "Answer must be Yes or No"
+
+                });
+
+            }
+
 
             const answeredAt =
                 new Date().toISOString();
 
-            const cleanedFood =
-                answer === "Yes"
-                    ? String(food).trim()
-                    : null;
+
+            /*
+             * Save Mama's answer.
+             */
 
             notification.answer =
                 answer;
 
-            notification.food =
-                cleanedFood;
+            notification.answeredBy =
+                "mama";
 
             notification.answeredAt =
                 answeredAt;
 
-            notification.answeredBy =
-                "mama";
 
-            // Save Mama's answered notification
             await redis.lset(
                 "notifications",
-                i,
-                JSON.stringify(notification)
+                foundIndex,
+                JSON.stringify(
+                    notification
+                )
             );
+
 
             await redis.set(
                 `notification:${notificationId}`,
                 notification
             );
 
-            originalNotification =
-                notification;
 
-            found = true;
+            /*
+             * MAMA SAID NO
+             *
+             * Nothing is sent to Landon.
+             */
 
-            break;
-        }
+            if (
+                answer === "No"
+            ) {
 
-        if (!found) {
-            return res.status(404).json({
-                error:
-                    "Notification not found"
-            });
-        }
+                return res.status(
+                    200
+                ).json({
 
-        /*
-         * Create a NEW notification for Landon.
-         *
-         * Mama answers first.
-         * Then Landon receives the result.
-         */
+                    success:
+                        true,
 
-        const meal =
-            originalNotification.meal ||
-            getMealFromNotification(
-                originalNotification
-            );
+                    answer:
+                        "No",
 
-        const landonNotificationId =
-            `${notificationId}-result`;
+                    sentToLandon:
+                        false,
 
-        const existingLandonNotification =
-            await redis.get(
-                `notification:${landonNotificationId}`
-            );
+                    message:
+                        "Mama answered No. Nothing was sent to Landon."
 
-        if (!existingLandonNotification) {
-
-            let landonTitle;
-            let landonBody;
-
-            if (answer === "Yes") {
-
-                landonTitle =
-                    `Mama says you ate ${capitalizeMeal(meal)}`;
-
-                landonBody =
-                    `Mama answered Yes. You ate: ${cleanedFood}`;
-
-            } else {
-
-                landonTitle =
-                    `Mama says you did not eat ${capitalizeMeal(meal)} yet`;
-
-                landonBody =
-                    "Mama answered No. You did not eat yet.";
+                });
 
             }
 
-            const landonNotification = {
 
-                id:
-                    landonNotificationId,
+            /* =========================
+               MAMA SAID YES
+            ========================= */
 
-                type:
-                    "foodResult",
 
-                recipient:
+            const landonNotificationId =
+                `${notificationId}-landon`;
+
+
+            const existing =
+                await redis.get(
+                    `notification:${landonNotificationId}`
+                );
+
+
+            /*
+             * Prevent duplicate Landon
+             * notifications.
+             */
+
+            if (!existing) {
+
+                const meal =
+                    notification.meal ||
+                    getMealFromNotification(
+                        notification
+                    );
+
+
+                const landonNotification = {
+
+                    id:
+                        landonNotificationId,
+
+                    type:
+                        "food",
+
+                    stage:
+                        "landon",
+
+                    recipient:
+                        "landon",
+
+                    meal:
+                        meal,
+
+                    title:
+                        "Send Notification",
+
+                    body:
+                        notification.body,
+
+                    answer:
+                        null,
+
+                    food:
+                        null,
+
+                    answeredBy:
+                        null,
+
+                    answeredAt:
+                        null,
+
+                    sourceNotificationId:
+                        notificationId,
+
+                    createdAt:
+                        new Date().toISOString()
+
+                };
+
+
+                /*
+                 * Save Landon's notification.
+                 */
+
+                await redis.lpush(
+                    "notifications",
+                    JSON.stringify(
+                        landonNotification
+                    )
+                );
+
+
+                await redis.ltrim(
+                    "notifications",
+                    0,
+                    99
+                );
+
+
+                await redis.set(
+                    `notification:${landonNotificationId}`,
+                    landonNotification
+                );
+
+
+                /*
+                 * NOW send it to Landon.
+                 */
+
+                await sendPush(
                     "landon",
 
-                meal:
-                    meal,
+                    landonNotification
+                );
 
-                title:
-                    landonTitle,
+            }
 
-                body:
-                    landonBody,
+
+            return res.status(
+                200
+            ).json({
+
+                success:
+                    true,
 
                 answer:
-                    answer,
+                    "Yes",
 
-                food:
-                    cleanedFood,
+                sentToLandon:
+                    true,
 
-                answeredBy:
-                    "mama",
+                message:
+                    "Mama answered Yes. Notification sent to Landon."
 
-                sourceNotificationId:
-                    notificationId,
+            });
 
-                createdAt:
-                    new Date().toISOString()
+        }
 
-            };
 
-            await redis.lpush(
+        /* =========================
+           LANDON ANSWERS
+        ========================= */
+
+        if (
+            username === "landon"
+        ) {
+
+            if (
+                notification.type !==
+                "food"
+            ) {
+
+                return res.status(
+                    400
+                ).json({
+
+                    error:
+                        "This notification cannot be answered"
+
+                });
+
+            }
+
+
+            if (
+                notification.recipient !==
+                "landon"
+            ) {
+
+                return res.status(
+                    403
+                ).json({
+
+                    error:
+                        "This notification belongs to another user"
+
+                });
+
+            }
+
+
+            /* =========================
+               LANDON FOOD SUBMISSION
+            ========================= */
+
+            if (
+                action === "food"
+            ) {
+
+                if (
+                    notification.answer !==
+                    "Yes"
+                ) {
+
+                    return res.status(
+                        400
+                    ).json({
+
+                        error:
+                            "Landon must answer Yes before entering food"
+
+                    });
+
+                }
+
+
+                if (
+                    !food ||
+                    !String(food).trim()
+                ) {
+
+                    return res.status(
+                        400
+                    ).json({
+
+                        error:
+                            "Please enter what Landon ate"
+
+                    });
+
+                }
+
+
+                notification.food =
+                    String(food).trim();
+
+                notification.foodSubmittedAt =
+                    new Date().toISOString();
+
+
+                await redis.lset(
+                    "notifications",
+                    foundIndex,
+                    JSON.stringify(
+                        notification
+                    )
+                );
+
+
+                await redis.set(
+                    `notification:${notificationId}`,
+                    notification
+                );
+
+
+                return res.status(
+                    200
+                ).json({
+
+                    success:
+                        true,
+
+                    action:
+                        "food",
+
+                    food:
+                        notification.food,
+
+                    message:
+                        "Food saved successfully"
+
+                });
+
+            }
+
+
+            /* =========================
+               LANDON YES / NO
+            ========================= */
+
+            if (
+                answer !== "Yes" &&
+                answer !== "No"
+            ) {
+
+                return res.status(
+                    400
+                ).json({
+
+                    error:
+                        "Answer must be Yes or No"
+
+                });
+
+            }
+
+
+            if (
+                notification.answer
+            ) {
+
+                return res.status(
+                    400
+                ).json({
+
+                    error:
+                        "This notification has already been answered"
+
+                });
+
+            }
+
+
+            notification.answer =
+                answer;
+
+            notification.answeredBy =
+                "landon";
+
+            notification.answeredAt =
+                new Date().toISOString();
+
+
+            await redis.lset(
                 "notifications",
+                foundIndex,
                 JSON.stringify(
-                    landonNotification
+                    notification
                 )
             );
 
+
             await redis.set(
-                `notification:${landonNotificationId}`,
-                landonNotification
+                `notification:${notificationId}`,
+                notification
             );
+
+
+            /*
+             * Landon said NO.
+             *
+             * No food input is needed.
+             */
+
+            if (
+                answer === "No"
+            ) {
+
+                return res.status(
+                    200
+                ).json({
+
+                    success:
+                        true,
+
+                    answer:
+                        "No",
+
+                    needsFood:
+                        false,
+
+                    message:
+                        "Landon answered No."
+
+                });
+
+            }
+
+
+            /*
+             * Landon said YES.
+             *
+             * The frontend should now
+             * show the food input.
+             */
+
+            return res.status(
+                200
+            ).json({
+
+                success:
+                    true,
+
+                answer:
+                    "Yes",
+
+                needsFood:
+                    true,
+
+                message:
+                    "Landon answered Yes. Ask what he ate."
+
+            });
+
         }
 
-        return res.status(200).json({
 
-            success:
-                true,
+        /* =========================
+           SYSTEM / OTHER USERS
+        ========================= */
 
-            notificationId:
-                notificationId,
+        return res.status(
+            403
+        ).json({
 
-            answer:
-                answer,
-
-            food:
-                cleanedFood,
-
-            answeredAt:
-                originalNotification.answeredAt,
-
-            landonNotificationCreated:
-                true
+            error:
+                "This account cannot answer food notifications"
 
         });
+
 
     } catch (error) {
 
@@ -270,22 +749,24 @@ module.exports = async (req, res) => {
             error
         );
 
-        return res.status(500).json({
+
+        return res.status(
+            500
+        ).json({
+
             error:
                 "Failed to save answer"
+
         });
 
     }
+
 };
 
 
-/*
- * Get the meal name.
- *
- * New notifications should have a "meal"
- * property, but this fallback keeps older
- * notifications working too.
- */
+/* =========================
+   GET MEAL NAME
+========================= */
 
 function getMealFromNotification(
     notification
@@ -298,39 +779,40 @@ function getMealFromNotification(
             ""
         ).toLowerCase();
 
+
     if (
-        text.includes("breakfast")
+        text.includes(
+            "breakfast"
+        )
     ) {
+
         return "breakfast";
+
     }
 
+
     if (
-        text.includes("lunch")
+        text.includes(
+            "lunch"
+        )
     ) {
+
         return "lunch";
+
     }
 
+
     if (
-        text.includes("dinner")
+        text.includes(
+            "dinner"
+        )
     ) {
+
         return "dinner";
+
     }
+
 
     return "meal";
-}
-
-
-function capitalizeMeal(
-    meal
-) {
-
-    if (!meal) {
-        return "Meal";
-    }
-
-    return (
-        meal.charAt(0).toUpperCase() +
-        meal.slice(1)
-    );
 
 }
