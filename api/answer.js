@@ -23,97 +23,128 @@ module.exports = async (req, res) => {
             });
         }
 
+        // Only Landon can answer food notifications
         if (username !== "landon") {
             return res.status(403).json({
                 error: "Only Landon can answer these notifications"
             });
         }
 
+        // Only Yes or No is allowed
         if (answer !== "Yes" && answer !== "No") {
             return res.status(400).json({
                 error: "Answer must be Yes or No"
             });
         }
 
-        if (answer === "Yes" && (!food || !String(food).trim())) {
+        // If Yes, Landon must say what he ate
+        if (
+            answer === "Yes" &&
+            (!food || !String(food).trim())
+        ) {
             return res.status(400).json({
                 error: "Please enter what you ate"
             });
         }
 
-        const key = `notification:${notificationId}`;
-
-        const notification = await redis.get(key);
-
-        if (!notification) {
-            return res.status(404).json({
-                error: "Notification not found"
-            });
-        }
-
-        const answeredAt = new Date().toISOString();
-
-        notification.answer = answer;
-        notification.answeredAt = answeredAt;
-        notification.answeredBy = "landon";
-
-        if (answer === "Yes") {
-            notification.food = String(food).trim();
-        } else {
-            notification.food = null;
-        }
-
-        await redis.set(key, notification);
-
-        const history =
+        // Get notification history
+        const notifications =
             await redis.lrange(
                 "notifications",
                 0,
                 99
             );
 
-        for (let i = 0; i < history.length; i++) {
+        let found = false;
+        let updatedNotification = null;
 
-            let item = history[i];
+        for (let i = 0; i < notifications.length; i++) {
 
-            if (typeof item === "string") {
+            let notification = notifications[i];
+
+            if (typeof notification === "string") {
                 try {
-                    item = JSON.parse(item);
+                    notification =
+                        JSON.parse(notification);
                 } catch {
                     continue;
                 }
             }
 
-            if (item.id === notificationId) {
-
-                item.answer = answer;
-                item.answeredAt = answeredAt;
-                item.answeredBy = "landon";
-
-                if (answer === "Yes") {
-                    item.food = String(food).trim();
-                } else {
-                    item.food = null;
-                }
-
-                await redis.lset(
-                    "notifications",
-                    i,
-                    JSON.stringify(item)
-                );
-
-                break;
+            if (
+                notification.id !==
+                notificationId
+            ) {
+                continue;
             }
+
+            // Make sure this is a food notification
+            if (
+                notification.type !==
+                "food"
+            ) {
+                return res.status(400).json({
+                    error:
+                        "This notification cannot be answered"
+                });
+            }
+
+            const answeredAt =
+                new Date().toISOString();
+
+            notification.answer =
+                answer;
+
+            notification.answeredAt =
+                answeredAt;
+
+            notification.answeredBy =
+                "landon";
+
+            if (answer === "Yes") {
+                notification.food =
+                    String(food).trim();
+            } else {
+                notification.food = null;
+            }
+
+            // Save the updated notification
+            await redis.lset(
+                "notifications",
+                i,
+                JSON.stringify(notification)
+            );
+
+            // Also save an individual copy
+            await redis.set(
+                `notification:${notificationId}`,
+                notification
+            );
+
+            found = true;
+            updatedNotification =
+                notification;
+
+            break;
+        }
+
+        if (!found) {
+            return res.status(404).json({
+                error:
+                    "Notification not found"
+            });
         }
 
         return res.status(200).json({
             success: true,
             notificationId,
             answer,
-            food: answer === "Yes"
-                ? String(food).trim()
-                : null,
-            answeredAt
+            food:
+                answer === "Yes"
+                    ? String(food).trim()
+                    : null,
+            answeredAt:
+                updatedNotification.answeredAt
         });
 
     } catch (error) {
@@ -124,7 +155,8 @@ module.exports = async (req, res) => {
         );
 
         return res.status(500).json({
-            error: "Failed to save answer"
+            error:
+                "Failed to save answer"
         });
     }
 };
