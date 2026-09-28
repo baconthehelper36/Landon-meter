@@ -1,11 +1,10 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Personal Inbox</title>
+    <title>Personal Dashboard</title>
 
     <style>
         * {
@@ -16,98 +15,75 @@
 
         body {
             font-family: Arial, Helvetica, sans-serif;
-            background: #07090d;
+            background: #080b12;
             color: white;
             min-height: 100vh;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
         button,
-        input {
+        input,
+        select {
             font-family: inherit;
         }
 
         /* =========================
            LOADING SCREEN
-        ========================== */
+        ========================= */
 
-        .loading-screen {
+        #loadingScreen {
             position: fixed;
             inset: 0;
-            z-index: 1000;
             background:
-                radial-gradient(
-                    circle at 50% 45%,
-                    #182033 0%,
-                    #090c13 45%,
-                    #040509 100%
-                );
-
+                radial-gradient(circle at center, #182238 0%, #080b12 60%);
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-direction: column;
-
-            transition:
-                opacity 0.8s ease,
-                visibility 0.8s ease;
+            z-index: 9999;
+            transition: opacity 0.6s ease;
         }
 
-        .loading-screen.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
+        .loadingBox {
+            width: min(420px, 85%);
+            text-align: center;
         }
 
-        .loader-ring {
-            width: 80px;
-            height: 80px;
+        .loadingTitle {
+            font-size: 34px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            letter-spacing: 2px;
+        }
 
+        .spinner {
+            width: 55px;
+            height: 55px;
+            border: 4px solid rgba(255,255,255,0.12);
+            border-top-color: #61a8ff;
             border-radius: 50%;
-
-            border: 3px solid rgba(255,255,255,0.08);
-            border-top-color: #ffffff;
-
-            animation: spin 0.9s linear infinite;
-
-            margin-bottom: 28px;
-
-            box-shadow:
-                0 0 40px rgba(255,255,255,0.08);
+            animation: spin 1s linear infinite;
+            margin: auto;
         }
 
-        .loading-text {
-            font-size: 14px;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.6);
-
-            animation: pulse 1.5s ease-in-out infinite;
+        .loadingText {
+            margin-top: 22px;
+            color: #aebbd0;
+            font-size: 15px;
         }
 
-        .loading-bar {
-            width: 220px;
-            height: 3px;
-
+        .progress {
+            height: 5px;
             background: rgba(255,255,255,0.08);
-
-            border-radius: 20px;
-
-            margin-top: 25px;
-
+            border-radius: 10px;
             overflow: hidden;
+            margin-top: 20px;
         }
 
-        .loading-progress {
-            width: 0%;
+        .progressBar {
             height: 100%;
-
-            background: white;
-
-            border-radius: 20px;
-
-            transition:
-                width 0.1s linear;
+            width: 0%;
+            background: #61a8ff;
+            transition: width 0.2s linear;
         }
 
         @keyframes spin {
@@ -116,624 +92,472 @@
             }
         }
 
-        @keyframes pulse {
-            50% {
-                opacity: 0.35;
-            }
-        }
-
-        /* =========================
-           BACKGROUND
-        ========================== */
-
-        .background {
-            position: fixed;
-            inset: 0;
-
-            pointer-events: none;
-
-            overflow: hidden;
-        }
-
-        .orb {
-            position: absolute;
-
-            width: 300px;
-            height: 300px;
-
-            border-radius: 50%;
-
-            filter: blur(100px);
-
-            opacity: 0.18;
-        }
-
-        .orb.one {
-            background: #3b82f6;
-
-            top: -120px;
-            left: -100px;
-
-            animation:
-                floatOne 10s ease-in-out infinite;
-        }
-
-        .orb.two {
-            background: #8b5cf6;
-
-            right: -120px;
-            bottom: -120px;
-
-            animation:
-                floatTwo 12s ease-in-out infinite;
-        }
-
-        @keyframes floatOne {
-            50% {
-                transform: translate(100px, 80px);
-            }
-        }
-
-        @keyframes floatTwo {
-            50% {
-                transform: translate(-100px, -80px);
-            }
-        }
-
         /* =========================
            LOGIN
-        ========================== */
+        ========================= */
 
-        .page {
-            position: relative;
-
+        #loginPage {
             min-height: 100vh;
-
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
-
             padding: 20px;
         }
 
-        .login-container {
-            width: 100%;
-            max-width: 420px;
-
-            padding: 42px;
-
-            background:
-                rgba(15, 18, 26, 0.78);
-
-            border:
-                1px solid rgba(255,255,255,0.08);
-
-            border-radius: 24px;
-
-            backdrop-filter: blur(20px);
-
-            box-shadow:
-                0 30px 100px rgba(0,0,0,0.5),
-                inset 0 1px rgba(255,255,255,0.05);
-
-            animation:
-                cardAppear 0.8s
-                cubic-bezier(.16,1,.3,1);
+        .loginCard {
+            width: min(400px, 100%);
+            background: rgba(18, 23, 35, 0.95);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.45);
         }
 
-        @keyframes cardAppear {
-            from {
-                opacity: 0;
-                transform:
-                    translateY(25px)
-                    scale(0.97);
-            }
-
-            to {
-                opacity: 1;
-                transform:
-                    translateY(0)
-                    scale(1);
-            }
-        }
-
-        .logo {
-            width: 58px;
-            height: 58px;
-
-            border-radius: 17px;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #ffffff,
-                    #777
-                );
-
-            color: #050608;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            font-size: 23px;
-            font-weight: bold;
-
-            margin-bottom: 25px;
-
-            box-shadow:
-                0 10px 35px
-                rgba(255,255,255,0.12);
-        }
-
-        .login-container h1 {
-            font-size: 32px;
+        .loginCard h1 {
+            font-size: 30px;
             margin-bottom: 8px;
         }
 
-        .subtitle {
-            color: rgba(255,255,255,0.48);
-
-            margin-bottom: 32px;
-
-            font-size: 14px;
+        .loginCard p {
+            color: #8e9bb0;
+            margin-bottom: 28px;
         }
 
-        .input-group {
-            margin-bottom: 17px;
+        .inputGroup {
+            margin-bottom: 16px;
         }
 
-        .input-group label {
+        .inputGroup label {
             display: block;
-
-            font-size: 12px;
-
-            color:
-                rgba(255,255,255,0.55);
-
-            margin-bottom: 8px;
+            margin-bottom: 7px;
+            font-size: 14px;
+            color: #b8c3d5;
         }
 
-        .input-group input {
+        .inputGroup input {
             width: 100%;
-
-            padding: 14px 15px;
-
-            border:
-                1px solid
-                rgba(255,255,255,0.08);
-
-            border-radius: 12px;
-
-            outline: none;
-
-            background:
-                rgba(255,255,255,0.04);
-
+            padding: 13px 14px;
+            background: #0c1019;
+            border: 1px solid #273044;
+            border-radius: 10px;
             color: white;
-
-            transition: 0.2s;
+            outline: none;
         }
 
-        .input-group input:focus {
-            border-color:
-                rgba(255,255,255,0.3);
-
-            background:
-                rgba(255,255,255,0.07);
+        .inputGroup input:focus {
+            border-color: #61a8ff;
         }
 
-        .login-button {
+        .loginButton {
             width: 100%;
-
-            margin-top: 8px;
-
-            padding: 15px;
-
+            padding: 13px;
             border: none;
-
-            border-radius: 12px;
-
-            background: white;
-
-            color: #07090d;
-
-            font-weight: bold;
-
+            border-radius: 10px;
+            background: #61a8ff;
+            color: #06101e;
+            font-weight: 700;
             cursor: pointer;
-
-            transition: 0.25s;
+            margin-top: 8px;
         }
 
-        .login-button:hover {
-            transform: translateY(-2px);
-
-            box-shadow:
-                0 12px 30px
-                rgba(255,255,255,0.12);
+        .loginButton:hover {
+            filter: brightness(1.08);
         }
 
-        .login-button:active {
-            transform: scale(0.98);
-        }
-
-        .error {
-            min-height: 18px;
-
-            margin-top: 13px;
-
-            text-align: center;
-
-            font-size: 12px;
-
-            color: #ff6b6b;
+        .loginError {
+            color: #ff7777;
+            font-size: 14px;
+            margin-top: 14px;
+            display: none;
         }
 
         /* =========================
            DASHBOARD
-        ========================== */
+        ========================= */
 
-        .dashboard {
+        #dashboard {
             display: none;
-
             min-height: 100vh;
-
-            padding: 40px;
-
-            position: relative;
-        }
-
-        .dashboard.visible {
-            display: block;
-
-            animation:
-                dashboardAppear 0.8s ease;
-        }
-
-        @keyframes dashboardAppear {
-            from {
-                opacity: 0;
-                transform: translateY(15px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .topbar {
+            height: 72px;
             display: flex;
-
             align-items: center;
             justify-content: space-between;
-
-            max-width: 1100px;
-
-            margin: auto;
+            padding: 0 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            background: rgba(8,11,18,0.85);
+            backdrop-filter: blur(15px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .greeting {
-            font-size:
-                clamp(28px, 5vw, 46px);
-
-            font-weight: 700;
-
-            letter-spacing: -1px;
+            font-size: 20px;
+            font-weight: 600;
         }
 
-        .account-name {
-            color:
-                rgba(255,255,255,0.42);
-
-            margin-top: 7px;
-
-            font-size: 14px;
-        }
-
-        .logout {
-            border:
-                1px solid
-                rgba(255,255,255,0.1);
-
-            background:
-                rgba(255,255,255,0.04);
-
-            color:
-                rgba(255,255,255,0.7);
-
-            padding: 10px 15px;
-
-            border-radius: 10px;
-
-            cursor: pointer;
-
-            transition: 0.2s;
-        }
-
-        .logout:hover {
-            background:
-                rgba(255,255,255,0.08);
-
-            color: white;
-        }
-
-        .inbox-area {
-            min-height:
-                calc(100vh - 150px);
-
+        .topRight {
             display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
+        .languageSelect {
+            background: #111827;
+            color: white;
+            border: 1px solid #29344a;
+            padding: 9px 12px;
+            border-radius: 9px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .logoutButton {
+            background: transparent;
+            color: #aebbd0;
+            border: 1px solid #29344a;
+            padding: 9px 13px;
+            border-radius: 9px;
+            cursor: pointer;
+        }
+
+        .logoutButton:hover {
+            color: white;
+            border-color: #61a8ff;
+        }
+
+        .dashboardContent {
+            min-height: calc(100vh - 72px);
+            display: flex;
             align-items: center;
             justify-content: center;
+            padding: 40px 20px;
         }
 
-        .inbox-button {
-            position: relative;
+        .dashboardCenter {
+            text-align: center;
+            width: min(700px, 100%);
+        }
 
-            width: 230px;
-            height: 230px;
+        .dashboardCenter h2 {
+            font-size: 30px;
+            margin-bottom: 35px;
+        }
 
+        .dashboardButtons {
+            display: flex;
+            justify-content: center;
+            gap: 22px;
+            flex-wrap: wrap;
+        }
+
+        .dashboardButton {
+            width: 220px;
+            height: 220px;
             border-radius: 50%;
-
-            border:
-                1px solid
-                rgba(255,255,255,0.12);
-
+            border: 1px solid rgba(255,255,255,0.1);
             background:
-                radial-gradient(
-                    circle at 35% 30%,
-                    rgba(255,255,255,0.12),
-                    rgba(255,255,255,0.025)
-                );
-
+                radial-gradient(circle at 35% 25%, #243552, #111827 55%, #0b0f18);
             color: white;
-
             cursor: pointer;
+            box-shadow: 0 20px 55px rgba(0,0,0,0.35);
+            transition: transform 0.25s ease, border-color 0.25s ease;
+        }
 
+        .dashboardButton:hover {
+            transform: translateY(-8px) scale(1.03);
+            border-color: #61a8ff;
+        }
+
+        .buttonIcon {
+            display: block;
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .buttonTitle {
             font-size: 22px;
-
-            font-weight: bold;
-
-            transition:
-                0.35s
-                cubic-bezier(.16,1,.3,1);
-
-            box-shadow:
-                0 20px 80px
-                rgba(0,0,0,0.35),
-
-                inset 0 1px
-                rgba(255,255,255,0.07);
+            font-weight: 700;
         }
 
-        .inbox-button:hover {
-            transform: scale(1.07);
-
-            border-color:
-                rgba(255,255,255,0.28);
-
-            box-shadow:
-                0 25px 100px
-                rgba(255,255,255,0.08),
-
-                inset 0 1px
-                rgba(255,255,255,0.12);
+        .buttonSub {
+            color: #8e9bb0;
+            margin-top: 7px;
+            font-size: 13px;
         }
 
-        .inbox-button:active {
-            transform: scale(0.96);
-        }
-
-        .notification-count {
+        .unreadBadge {
             position: absolute;
-
-            top: 25px;
-            right: 25px;
-
-            min-width: 30px;
-            height: 30px;
-
-            padding: 0 8px;
-
+            margin-left: 140px;
+            margin-top: -200px;
+            background: #ff5555;
+            color: white;
+            min-width: 27px;
+            height: 27px;
+            padding: 0 7px;
             border-radius: 20px;
-
-            background: white;
-
-            color: black;
-
-            display: flex;
-
+            display: none;
             align-items: center;
             justify-content: center;
-
             font-size: 12px;
+            font-weight: 700;
+        }
 
-            font-weight: bold;
+        /* =========================
+           MODALS
+        ========================= */
+
+        .modalOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 500;
+        }
+
+        .modal {
+            width: min(650px, 100%);
+            max-height: 85vh;
+            background: #101621;
+            border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 30px 90px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modalHeader {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 22px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .modalHeader h2 {
+            font-size: 21px;
+        }
+
+        .closeButton {
+            border: none;
+            background: transparent;
+            color: #8e9bb0;
+            font-size: 25px;
+            cursor: pointer;
+        }
+
+        .closeButton:hover {
+            color: white;
         }
 
         /* =========================
            INBOX
-        ========================== */
+        ========================= */
 
-        .inbox-panel {
-            display: none;
-
-            position: fixed;
-
-            inset: 0;
-
-            z-index: 100;
-
-            background:
-                rgba(3,5,9,0.75);
-
-            backdrop-filter: blur(15px);
-
-            padding: 30px;
-
+        .notifications {
             overflow-y: auto;
-        }
-
-        .inbox-panel.open {
-            display: block;
-
-            animation:
-                fadeIn 0.25s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        .inbox-content {
-            max-width: 700px;
-
-            margin: 50px auto;
-        }
-
-        .inbox-header {
-            display: flex;
-
-            justify-content: space-between;
-
-            align-items: center;
-
-            margin-bottom: 25px;
-        }
-
-        .inbox-header h2 {
-            font-size: 32px;
-        }
-
-        .close-button {
-            width: 40px;
-            height: 40px;
-
-            border-radius: 50%;
-
-            border:
-                1px solid
-                rgba(255,255,255,0.1);
-
-            background:
-                rgba(255,255,255,0.05);
-
-            color: white;
-
-            cursor: pointer;
-
-            font-size: 20px;
+            padding: 15px;
         }
 
         .notification {
-            padding: 20px;
-
-            border-radius: 16px;
-
-            border:
-                1px solid
-                rgba(255,255,255,0.08);
-
-            background:
-                rgba(255,255,255,0.035);
-
+            background: #151c29;
+            border: 1px solid #222d40;
+            border-radius: 13px;
+            padding: 17px;
             margin-bottom: 12px;
-
-            cursor: pointer;
-
-            transition: 0.25s;
-        }
-
-        .notification:hover {
-            background:
-                rgba(255,255,255,0.07);
-
-            transform: translateX(4px);
         }
 
         .notification.unread {
-            border-color:
-                rgba(255,255,255,0.2);
+            border-color: #38577f;
         }
 
-        .notification-top {
+        .notificationTop {
             display: flex;
-
             justify-content: space-between;
-
+            gap: 15px;
             margin-bottom: 8px;
         }
 
-        .sender {
-            font-weight: bold;
+        .notificationTitle {
+            font-weight: 700;
         }
 
-        .time {
-            font-size: 11px;
-
-            color:
-                rgba(255,255,255,0.4);
-        }
-
-        .notification-title {
-            font-size: 15px;
-
-            margin-bottom: 6px;
-        }
-
-        .notification-message {
-            color:
-                rgba(255,255,255,0.52);
-
+        .notificationSender {
+            color: #61a8ff;
             font-size: 13px;
+        }
 
+        .notificationMessage {
+            color: #b4bfd0;
             line-height: 1.5;
+            font-size: 14px;
         }
 
-        .read-label {
-            display: inline-block;
-
+        .notificationTime {
+            color: #68758a;
+            font-size: 12px;
             margin-top: 12px;
-
-            font-size: 10px;
-
-            color:
-                rgba(255,255,255,0.35);
-
-            text-transform: uppercase;
-
-            letter-spacing: 1px;
         }
 
-        .empty {
+        .notificationActions {
+            margin-top: 13px;
+        }
+
+        .readButton {
+            background: #202c40;
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .emptyState {
+            padding: 45px 20px;
             text-align: center;
-
-            padding: 70px 20px;
-
-            color:
-                rgba(255,255,255,0.35);
+            color: #7f8ba0;
         }
 
-        @media (max-width: 600px) {
+        /* =========================
+           AI ASSISTANT
+        ========================= */
 
-            .dashboard {
-                padding: 25px;
+        .aiModal {
+            width: min(850px, 100%);
+            height: min(750px, 88vh);
+        }
+
+        .chatMessages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .chatMessage {
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        .chatMessage.user {
+            justify-content: flex-end;
+        }
+
+        .chatBubble {
+            max-width: 78%;
+            padding: 12px 15px;
+            border-radius: 14px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .chatMessage.assistant .chatBubble {
+            background: #192335;
+            color: #e8edf5;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chatMessage.user .chatBubble {
+            background: #61a8ff;
+            color: #06101e;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chatName {
+            font-size: 11px;
+            color: #738198;
+            margin-bottom: 4px;
+        }
+
+        .chatInputArea {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            border-top: 1px solid rgba(255,255,255,0.07);
+            background: #0d121c;
+        }
+
+        .chatInput {
+            flex: 1;
+            resize: none;
+            min-height: 46px;
+            max-height: 130px;
+            padding: 13px;
+            background: #151c29;
+            border: 1px solid #29344a;
+            border-radius: 11px;
+            color: white;
+            outline: none;
+        }
+
+        .chatInput:focus {
+            border-color: #61a8ff;
+        }
+
+        .sendButton {
+            width: 95px;
+            border: none;
+            border-radius: 11px;
+            background: #61a8ff;
+            color: #06101e;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .sendButton:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .typing {
+            color: #8390a5;
+            font-size: 13px;
+            padding: 0 20px 12px;
+            display: none;
+        }
+
+        @media (max-width: 650px) {
+            .topbar {
+                padding: 0 15px;
             }
 
-            .login-container {
-                padding: 30px;
+            .greeting {
+                font-size: 16px;
             }
 
-            .inbox-button {
-                width: 190px;
-                height: 190px;
+            .languageSelect {
+                max-width: 100px;
+            }
+
+            .dashboardButton {
+                width: 175px;
+                height: 175px;
+            }
+
+            .buttonIcon {
+                font-size: 38px;
+            }
+
+            .buttonTitle {
+                font-size: 18px;
+            }
+
+            .unreadBadge {
+                margin-left: 110px;
+                margin-top: -160px;
+            }
+
+            .chatBubble {
+                max-width: 88%;
             }
         }
     </style>
@@ -741,516 +565,782 @@
 
 <body>
 
-    <div class="background">
-        <div class="orb one"></div>
-        <div class="orb two"></div>
-    </div>
-
     <!-- =========================
          LOADING SCREEN
-    ========================== -->
+    ========================= -->
 
-    <div class="loading-screen" id="loadingScreen">
+    <div id="loadingScreen">
+        <div class="loadingBox">
+            <div class="loadingTitle">PERSONAL</div>
 
-        <div class="loader-ring"></div>
+            <div class="spinner"></div>
 
-        <div class="loading-text" id="loadingText">
-            Loading
-        </div>
-
-        <div class="loading-bar">
-
-            <div
-                class="loading-progress"
-                id="loadingProgress">
+            <div class="loadingText" id="loadingText">
+                Starting up...
             </div>
 
+            <div class="progress">
+                <div class="progressBar" id="progressBar"></div>
+            </div>
         </div>
-
     </div>
 
+
     <!-- =========================
-         LOGIN PAGE
-    ========================== -->
+         LOGIN
+    ========================= -->
 
-    <main class="page" id="loginPage">
+    <div id="loginPage">
 
-        <div class="login-container">
+        <div class="loginCard">
 
-            <div class="logo">
-                L
-            </div>
+            <h1>Welcome back</h1>
 
-            <h1>
-                Welcome back.
-            </h1>
+            <p>Sign in to continue to your dashboard.</p>
 
-            <p class="subtitle">
-                Sign in to continue.
-            </p>
-
-            <div class="input-group">
-
-                <label for="username">
-                    Username
-                </label>
-
+            <div class="inputGroup">
+                <label>Username</label>
                 <input
-                    id="username"
                     type="text"
+                    id="username"
                     autocomplete="username"
                     placeholder="Enter username"
                 >
-
             </div>
 
-            <div class="input-group">
-
-                <label for="password">
-                    Password
-                </label>
-
+            <div class="inputGroup">
+                <label>Password</label>
                 <input
-                    id="password"
                     type="password"
+                    id="password"
                     autocomplete="current-password"
                     placeholder="Enter password"
                 >
-
             </div>
 
-            <button
-                class="login-button"
-                id="loginButton">
-                Sign In
+            <button class="loginButton" onclick="login()">
+                Login
             </button>
 
-            <div
-                class="error"
-                id="loginError">
+            <div class="loginError" id="loginError">
+                Incorrect username or password.
             </div>
 
         </div>
 
-    </main>
+    </div>
+
 
     <!-- =========================
          DASHBOARD
-    ========================== -->
+    ========================= -->
 
-    <main
-        class="dashboard"
-        id="dashboard">
+    <div id="dashboard">
 
         <div class="topbar">
 
-            <div>
+            <div class="greeting" id="greeting">
+                Good afternoon
+            </div>
 
-                <div
-                    class="greeting"
-                    id="greeting">
-                    Good afternoon Landon
-                </div>
+            <div class="topRight">
 
-                <div
-                    class="account-name"
-                    id="accountName">
-                    Personal Inbox
+                <select
+                    class="languageSelect"
+                    id="languageSelect"
+                    onchange="changeLanguage()"
+                    title="Website language"
+                >
+                    <option value="en">English</option>
+                    <option value="id">Bahasa Indonesia</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="de">Deutsch</option>
+                    <option value="zh">中文</option>
+                    <option value="ja">日本語</option>
+                    <option value="ko">한국어</option>
+                </select>
+
+                <button class="logoutButton" onclick="logout()">
+                    Logout
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="dashboardContent">
+
+            <div class="dashboardCenter">
+
+                <h2 id="dashboardTitle">
+                    What would you like to do?
+                </h2>
+
+                <div class="dashboardButtons">
+
+                    <!-- INBOX -->
+
+                    <div style="position: relative;">
+
+                        <button
+                            class="dashboardButton"
+                            onclick="openInbox()"
+                        >
+                            <span class="buttonIcon">📨</span>
+
+                            <span class="buttonTitle" id="inboxButtonText">
+                                Inbox
+                            </span>
+
+                            <span class="buttonSub" id="inboxSubText">
+                                Your notifications
+                            </span>
+                        </button>
+
+                        <div
+                            class="unreadBadge"
+                            id="unreadBadge"
+                        >
+                            0
+                        </div>
+
+                    </div>
+
+
+                    <!-- AI ASSISTANT -->
+
+                    <button
+                        class="dashboardButton"
+                        onclick="openAI()"
+                    >
+                        <span class="buttonIcon">🤖</span>
+
+                        <span class="buttonTitle" id="aiButtonText">
+                            AI Assistant
+                        </span>
+
+                        <span class="buttonSub" id="aiSubText">
+                            Ask me anything
+                        </span>
+                    </button>
+
                 </div>
 
             </div>
 
-            <button
-                class="logout"
-                id="logoutButton">
-                Log out
-            </button>
-
         </div>
 
-        <div class="inbox-area">
+    </div>
 
-            <button
-                class="inbox-button"
-                id="inboxButton">
-
-                Inbox
-
-                <span
-                    class="notification-count"
-                    id="notificationCount">
-                    0
-                </span>
-
-            </button>
-
-        </div>
-
-    </main>
 
     <!-- =========================
-         INBOX
-    ========================== -->
+         INBOX MODAL
+    ========================= -->
 
     <div
-        class="inbox-panel"
-        id="inboxPanel">
+        class="modalOverlay"
+        id="inboxModal"
+        onclick="closeModalIfBackground(event, 'inboxModal')"
+    >
 
-        <div class="inbox-content">
+        <div class="modal">
 
-            <div class="inbox-header">
+            <div class="modalHeader">
 
-                <h2>
+                <h2 id="inboxTitle">
                     Inbox
                 </h2>
 
                 <button
-                    class="close-button"
-                    id="closeInbox">
+                    class="closeButton"
+                    onclick="closeInbox()"
+                >
                     ×
                 </button>
 
             </div>
 
-            <div id="notifications"></div>
+            <div
+                class="notifications"
+                id="notifications"
+            ></div>
 
         </div>
 
     </div>
 
+
+    <!-- =========================
+         AI MODAL
+    ========================= -->
+
+    <div
+        class="modalOverlay"
+        id="aiModal"
+        onclick="closeModalIfBackground(event, 'aiModal')"
+    >
+
+        <div class="modal aiModal">
+
+            <div class="modalHeader">
+
+                <h2 id="aiTitle">
+                    AI Assistant
+                </h2>
+
+                <button
+                    class="closeButton"
+                    onclick="closeAI()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+            <div
+                class="chatMessages"
+                id="chatMessages"
+            ></div>
+
+            <div
+                class="typing"
+                id="typingIndicator"
+            >
+                AI is thinking...
+            </div>
+
+            <div class="chatInputArea">
+
+                <textarea
+                    class="chatInput"
+                    id="chatInput"
+                    placeholder="Ask me anything..."
+                    rows="1"
+                ></textarea>
+
+                <button
+                    class="sendButton"
+                    id="sendButton"
+                    onclick="sendMessage()"
+                >
+                    Send
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
     <script>
-        "use strict";
 
         /* =========================
            ACCOUNT DATA
-        ========================== */
+        ========================= */
 
         const accounts = {
             landon: {
-                username: "landon",
                 password: "landon",
                 displayName: "Landon"
             },
 
             mama: {
-                username: "mama",
                 password: "mama",
                 displayName: "Mama"
             }
         };
 
-        /* =========================
-           DOM REFERENCES
-        ========================== */
 
-        const loadingScreen =
-            document.getElementById(
-                "loadingScreen"
-            );
+        let currentUser = null;
 
-        const loadingText =
-            document.getElementById(
-                "loadingText"
-            );
+        let chatMessages = [];
 
-        const loadingProgress =
-            document.getElementById(
-                "loadingProgress"
-            );
-
-        const loginPage =
-            document.getElementById(
-                "loginPage"
-            );
-
-        const loginButton =
-            document.getElementById(
-                "loginButton"
-            );
-
-        const loginError =
-            document.getElementById(
-                "loginError"
-            );
-
-        const usernameInput =
-            document.getElementById(
-                "username"
-            );
-
-        const passwordInput =
-            document.getElementById(
-                "password"
-            );
-
-        const dashboard =
-            document.getElementById(
-                "dashboard"
-            );
-
-        const greeting =
-            document.getElementById(
-                "greeting"
-            );
-
-        const accountName =
-            document.getElementById(
-                "accountName"
-            );
-
-        const inboxButton =
-            document.getElementById(
-                "inboxButton"
-            );
-
-        const inboxPanel =
-            document.getElementById(
-                "inboxPanel"
-            );
-
-        const closeInbox =
-            document.getElementById(
-                "closeInbox"
-            );
-
-        const notificationsContainer =
-            document.getElementById(
-                "notifications"
-            );
-
-        const notificationCount =
-            document.getElementById(
-                "notificationCount"
-            );
-
-        const logoutButton =
-            document.getElementById(
-                "logoutButton"
-            );
 
         /* =========================
-           LOADING SCREEN
-        ========================== */
+           TRANSLATIONS
+        ========================= */
+
+        const translations = {
+
+            en: {
+                dashboard: "What would you like to do?",
+                inbox: "Inbox",
+                inboxSub: "Your notifications",
+                ai: "AI Assistant",
+                aiSub: "Ask me anything",
+                logout: "Logout",
+                inboxTitle: "Inbox",
+                aiTitle: "AI Assistant",
+                send: "Send",
+                placeholder: "Ask me anything...",
+                thinking: "AI is thinking...",
+                welcome: "Welcome to your new inbox.",
+                systemWelcome: "Welcome!",
+                empty: "No notifications yet."
+            },
+
+            id: {
+                dashboard: "Apa yang ingin kamu lakukan?",
+                inbox: "Kotak Masuk",
+                inboxSub: "Notifikasi kamu",
+                ai: "Asisten AI",
+                aiSub: "Tanyakan apa saja",
+                logout: "Keluar",
+                inboxTitle: "Kotak Masuk",
+                aiTitle: "Asisten AI",
+                send: "Kirim",
+                placeholder: "Tanyakan apa saja...",
+                thinking: "AI sedang berpikir...",
+                welcome: "Selamat datang di kotak masuk baru kamu.",
+                systemWelcome: "Selamat datang!",
+                empty: "Belum ada notifikasi."
+            },
+
+            es: {
+                dashboard: "¿Qué te gustaría hacer?",
+                inbox: "Bandeja",
+                inboxSub: "Tus notificaciones",
+                ai: "Asistente IA",
+                aiSub: "Pregúntame lo que quieras",
+                logout: "Cerrar sesión",
+                inboxTitle: "Bandeja",
+                aiTitle: "Asistente IA",
+                send: "Enviar",
+                placeholder: "Pregúntame lo que quieras...",
+                thinking: "La IA está pensando...",
+                welcome: "Bienvenido a tu nueva bandeja.",
+                systemWelcome: "¡Bienvenido!",
+                empty: "No hay notificaciones."
+            },
+
+            fr: {
+                dashboard: "Que souhaitez-vous faire ?",
+                inbox: "Boîte de réception",
+                inboxSub: "Vos notifications",
+                ai: "Assistant IA",
+                aiSub: "Demandez-moi n'importe quoi",
+                logout: "Déconnexion",
+                inboxTitle: "Boîte de réception",
+                aiTitle: "Assistant IA",
+                send: "Envoyer",
+                placeholder: "Demandez-moi n'importe quoi...",
+                thinking: "L'IA réfléchit...",
+                welcome: "Bienvenue dans votre nouvelle boîte de réception.",
+                systemWelcome: "Bienvenue !",
+                empty: "Aucune notification."
+            },
+
+            de: {
+                dashboard: "Was möchtest du tun?",
+                inbox: "Posteingang",
+                inboxSub: "Deine Benachrichtigungen",
+                ai: "KI-Assistent",
+                aiSub: "Frag mich alles",
+                logout: "Abmelden",
+                inboxTitle: "Posteingang",
+                aiTitle: "KI-Assistent",
+                send: "Senden",
+                placeholder: "Frag mich alles...",
+                thinking: "Die KI denkt nach...",
+                welcome: "Willkommen in deinem neuen Posteingang.",
+                systemWelcome: "Willkommen!",
+                empty: "Noch keine Benachrichtigungen."
+            },
+
+            zh: {
+                dashboard: "你想做什么？",
+                inbox: "收件箱",
+                inboxSub: "你的通知",
+                ai: "AI 助手",
+                aiSub: "问我任何问题",
+                logout: "退出登录",
+                inboxTitle: "收件箱",
+                aiTitle: "AI 助手",
+                send: "发送",
+                placeholder: "问我任何问题...",
+                thinking: "AI 正在思考...",
+                welcome: "欢迎来到你的新收件箱。",
+                systemWelcome: "欢迎！",
+                empty: "暂无通知。"
+            },
+
+            ja: {
+                dashboard: "何をしますか？",
+                inbox: "受信トレイ",
+                inboxSub: "あなたの通知",
+                ai: "AIアシスタント",
+                aiSub: "何でも聞いてください",
+                logout: "ログアウト",
+                inboxTitle: "受信トレイ",
+                aiTitle: "AIアシスタント",
+                send: "送信",
+                placeholder: "何でも聞いてください...",
+                thinking: "AIが考えています...",
+                welcome: "新しい受信トレイへようこそ。",
+                systemWelcome: "ようこそ！",
+                empty: "通知はありません。"
+            },
+
+            ko: {
+                dashboard: "무엇을 하시겠어요?",
+                inbox: "받은 편지함",
+                inboxSub: "알림",
+                ai: "AI 어시스턴트",
+                aiSub: "무엇이든 물어보세요",
+                logout: "로그아웃",
+                inboxTitle: "받은 편지함",
+                aiTitle: "AI 어시스턴트",
+                send: "보내기",
+                placeholder: "무엇이든 물어보세요...",
+                thinking: "AI가 생각하고 있습니다...",
+                welcome: "새 받은 편지함에 오신 것을 환영합니다.",
+                systemWelcome: "환영합니다!",
+                empty: "알림이 없습니다."
+            }
+        };
+
+
+        /* =========================
+           LOADING
+        ========================= */
 
         function runLoadingScreen(callback) {
 
-            let progress = 0;
+            const loadingScreen =
+                document.getElementById("loadingScreen");
 
-            loadingProgress.style.width = "0%";
+            const progressBar =
+                document.getElementById("progressBar");
 
-            loadingScreen.classList.remove(
-                "hidden"
-            );
+            const loadingText =
+                document.getElementById("loadingText");
 
-            const loadingMessages = [
-                "Loading",
-                "Preparing",
-                "Almost there",
-                "Ready"
+            const messages = [
+                "Starting up...",
+                "Preparing dashboard...",
+                "Loading your account...",
+                "Almost ready..."
             ];
 
-            const interval =
-                setInterval(function () {
+            let progress = 0;
 
-                    progress +=
-                        Math.random() * 8 + 4;
+            loadingScreen.style.display = "flex";
+            loadingScreen.style.opacity = "1";
 
-                    if (progress >= 100) {
-                        progress = 100;
-                    }
+            const interval = setInterval(() => {
 
-                    loadingProgress.style.width =
-                        progress + "%";
+                progress += 5;
 
-                    const messageIndex =
-                        Math.min(
-                            Math.floor(
-                                progress / 25
-                            ),
-                            loadingMessages.length - 1
-                        );
+                progressBar.style.width = progress + "%";
 
-                    loadingText.textContent =
-                        loadingMessages[
-                            messageIndex
-                        ];
+                const index =
+                    Math.min(
+                        Math.floor(progress / 25),
+                        messages.length - 1
+                    );
 
-                    if (progress >= 100) {
+                loadingText.textContent = messages[index];
 
-                        clearInterval(interval);
+                if (progress >= 100) {
 
-                        setTimeout(function () {
+                    clearInterval(interval);
 
-                            loadingScreen.classList.add(
-                                "hidden"
-                            );
+                    setTimeout(() => {
 
-                            if (
-                                typeof callback ===
-                                "function"
-                            ) {
+                        loadingScreen.style.opacity = "0";
+
+                        setTimeout(() => {
+
+                            loadingScreen.style.display = "none";
+
+                            if (callback) {
                                 callback();
                             }
 
-                        }, 500);
-                    }
+                        }, 600);
 
-                }, 100);
+                    }, 250);
+                }
+
+            }, 70);
         }
 
+
         /* =========================
-           TIME GREETING
-        ========================== */
+           GREETING
+        ========================= */
 
-        function getGreeting() {
+        function getGreeting(name) {
 
-            const hour =
-                new Date().getHours();
+            const hour = new Date().getHours();
 
             if (hour >= 5 && hour < 12) {
-                return "Good morning";
+                return "Good morning " + name;
             }
 
             if (hour >= 12 && hour < 18) {
-                return "Good afternoon";
+                return "Good afternoon " + name;
             }
 
             if (hour >= 18 && hour < 22) {
-                return "Good evening";
+                return "Good evening " + name;
             }
 
-            return "Good night";
+            return "Good night " + name;
         }
 
-        function updateGreeting(displayName) {
-
-            greeting.textContent =
-                getGreeting() +
-                " " +
-                displayName;
-        }
 
         /* =========================
-           NOTIFICATION STORAGE
-        ========================== */
+           LOGIN
+        ========================= */
+
+        function login() {
+
+            const username =
+                document.getElementById("username").value
+                .trim()
+                .toLowerCase();
+
+            const password =
+                document.getElementById("password").value;
+
+            const error =
+                document.getElementById("loginError");
+
+            if (
+                accounts[username] &&
+                accounts[username].password === password
+            ) {
+
+                currentUser = {
+                    username,
+                    displayName: accounts[username].displayName
+                };
+
+                localStorage.setItem(
+                    "loggedInUser",
+                    username
+                );
+
+                error.style.display = "none";
+
+                document.getElementById("loginPage").style.display =
+                    "none";
+
+                runLoadingScreen(() => {
+
+                    showDashboard();
+
+                });
+
+            } else {
+
+                error.style.display = "block";
+
+            }
+        }
+
+
+        /* =========================
+           DASHBOARD
+        ========================= */
+
+        function showDashboard() {
+
+            document.getElementById("dashboard").style.display =
+                "block";
+
+            updateGreeting();
+
+            loadLanguage();
+
+            createSystemNotification();
+
+            updateUnreadCount();
+
+        }
+
+
+        function updateGreeting() {
+
+            if (!currentUser) return;
+
+            document.getElementById("greeting").textContent =
+                getGreeting(currentUser.displayName);
+        }
+
+
+        /* =========================
+           LANGUAGE
+        ========================= */
+
+        function getLanguage() {
+
+            return localStorage.getItem(
+                "selectedLanguage"
+            ) || "en";
+        }
+
+
+        function changeLanguage() {
+
+            const language =
+                document.getElementById("languageSelect").value;
+
+            localStorage.setItem(
+                "selectedLanguage",
+                language
+            );
+
+            updateLanguage();
+
+        }
+
+
+        function loadLanguage() {
+
+            const select =
+                document.getElementById("languageSelect");
+
+            select.value = getLanguage();
+
+            updateLanguage();
+
+        }
+
+
+        function updateLanguage() {
+
+            const language = getLanguage();
+
+            const t =
+                translations[language] ||
+                translations.en;
+
+            document.getElementById("dashboardTitle")
+                .textContent = t.dashboard;
+
+            document.getElementById("inboxButtonText")
+                .textContent = t.inbox;
+
+            document.getElementById("inboxSubText")
+                .textContent = t.inboxSub;
+
+            document.getElementById("aiButtonText")
+                .textContent = t.ai;
+
+            document.getElementById("aiSubText")
+                .textContent = t.aiSub;
+
+            document.querySelector(".logoutButton")
+                .textContent = t.logout;
+
+            document.getElementById("inboxTitle")
+                .textContent = t.inboxTitle;
+
+            document.getElementById("aiTitle")
+                .textContent = t.aiTitle;
+
+            document.getElementById("sendButton")
+                .textContent = t.send;
+
+            document.getElementById("chatInput")
+                .placeholder = t.placeholder;
+
+            document.getElementById("typingIndicator")
+                .textContent = t.thinking;
+
+            renderNotifications();
+        }
+
+
+        /* =========================
+           LOGOUT
+        ========================= */
+
+        function logout() {
+
+            localStorage.removeItem("loggedInUser");
+
+            currentUser = null;
+
+            document.getElementById("dashboard").style.display =
+                "none";
+
+            document.getElementById("loginPage").style.display =
+                "none";
+
+            runLoadingScreen(() => {
+
+                document.getElementById("loginPage").style.display =
+                    "flex";
+
+                document.getElementById("username").value = "";
+                document.getElementById("password").value = "";
+
+            });
+        }
+
+
+        /* =========================
+           NOTIFICATIONS
+        ========================= */
 
         const NOTIFICATION_LIFETIME =
             24 * 60 * 60 * 1000;
 
+
         function getNotifications() {
 
-            const saved =
-                localStorage.getItem(
-                    "notifications"
+            let notifications =
+                JSON.parse(
+                    localStorage.getItem("notifications") || "[]"
                 );
 
-            let notifications = [];
-
-            if (saved) {
-
-                try {
-
-                    notifications =
-                        JSON.parse(saved);
-
-                } catch (error) {
-
-                    console.error(
-                        "Could not load notifications:",
-                        error
-                    );
-
-                    notifications = [];
-                }
-            }
-
-            /*
-             * Remove notifications that are
-             * older than 24 hours.
-             */
             const now = Date.now();
 
-            notifications =
-                notifications.filter(
-                    function (notification) {
+            notifications = notifications.filter(notification => {
 
-                        if (
-                            !notification.createdAt
-                        ) {
-                            /*
-                             * Old notifications from
-                             * the previous version don't
-                             * have a timestamp.
-                             *
-                             * Give them a timestamp now
-                             * so they can enter the new
-                             * expiration system.
-                             */
-                            notification.createdAt =
-                                now;
+                if (!notification.createdAt) {
+                    notification.createdAt = now;
+                }
 
-                            return true;
-                        }
-
-                        const age =
-                            now -
-                            notification.createdAt;
-
-                        return (
-                            age <
-                            NOTIFICATION_LIFETIME
-                        );
-                    }
+                return (
+                    now - notification.createdAt
+                    < NOTIFICATION_LIFETIME
                 );
 
-            saveNotifications(notifications);
+            });
+
+            localStorage.setItem(
+                "notifications",
+                JSON.stringify(notifications)
+            );
 
             return notifications;
         }
 
-        function saveNotifications(notifications) {
-
-            localStorage.setItem(
-                "notifications",
-                JSON.stringify(
-                    notifications
-                )
-            );
-        }
-
-        /* =========================
-           DEFAULT SYSTEM MESSAGE
-        ========================== */
 
         function createSystemNotification() {
 
             const notifications =
                 getNotifications();
 
-            /*
-             * Only create the welcome message
-             * if there isn't already one.
-             */
             const alreadyExists =
                 notifications.some(
-                    function (notification) {
-
-                        return (
-                            notification.sender ===
-                            "System" &&
-                            notification.title ===
-                            "Welcome!"
-                        );
-                    }
+                    notification =>
+                        notification.sender === "System" &&
+                        notification.title === "Welcome!"
                 );
 
             if (!alreadyExists) {
 
-                notifications.unshift({
+                notifications.push({
 
-                    id:
-                        "system-" +
-                        Date.now(),
+                    id: Date.now(),
 
                     sender: "System",
 
@@ -1259,404 +1349,464 @@
                     message:
                         "Welcome to your new inbox.",
 
-                    time: "Just now",
-
-                    createdAt:
-                        Date.now(),
+                    createdAt: Date.now(),
 
                     read: false
 
                 });
 
-                saveNotifications(
-                    notifications
+                localStorage.setItem(
+                    "notifications",
+                    JSON.stringify(notifications)
                 );
             }
         }
 
-        /* =========================
-           LOGIN
-        ========================== */
 
-        function login() {
-
-            const username =
-                usernameInput.value
-                    .trim()
-                    .toLowerCase();
-
-            const password =
-                passwordInput.value;
-
-            const account =
-                accounts[username];
-
-            if (
-                !account ||
-                account.password !== password
-            ) {
-
-                loginError.textContent =
-                    "Incorrect username or password.";
-
-                return;
-            }
-
-            loginError.textContent = "";
-
-            localStorage.setItem(
-                "loggedInUser",
-                account.username
-            );
-
-            runLoadingScreen(
-                function () {
-
-                    loginPage.style.display =
-                        "none";
-
-                    updateGreeting(
-                        account.displayName
-                    );
-
-                    accountName.textContent =
-                        account.username ===
-                        "landon"
-                            ? "Personal Inbox"
-                            : "Mama's Inbox";
-
-                    dashboard.classList.add(
-                        "visible"
-                    );
-
-                    /*
-                     * The system welcome
-                     * notification belongs
-                     * to Landon's inbox.
-                     */
-                    if (
-                        account.username ===
-                        "landon"
-                    ) {
-
-                        createSystemNotification();
-
-                        updateNotificationCount();
-                    }
-
-                }
-            );
-        }
-
-        /* =========================
-           LOGOUT
-        ========================== */
-
-        function logout() {
-
-            localStorage.removeItem(
-                "loggedInUser"
-            );
-
-            dashboard.classList.remove(
-                "visible"
-            );
-
-            loginPage.style.display =
-                "flex";
-
-            usernameInput.value = "";
-            passwordInput.value = "";
-
-            inboxPanel.classList.remove(
-                "open"
-            );
-
-            runLoadingScreen();
-        }
-
-        /* =========================
-           RENDER NOTIFICATIONS
-        ========================== */
-
-        function renderNotifications() {
-
-            const notifications =
-                getNotifications();
-
-            notificationsContainer.innerHTML =
-                "";
-
-            if (
-                notifications.length === 0
-            ) {
-
-                notificationsContainer.innerHTML =
-                    '<div class="empty">' +
-                    'Your inbox is empty.' +
-                    '</div>';
-
-                return;
-            }
-
-            notifications.forEach(
-                function (notification) {
-
-                    const element =
-                        document.createElement(
-                            "div"
-                        );
-
-                    element.className =
-                        "notification" +
-                        (
-                            notification.read
-                                ? ""
-                                : " unread"
-                        );
-
-                    element.innerHTML = `
-                        <div class="notification-top">
-                            <span class="sender">
-                                ${escapeHTML(
-                                    notification.sender
-                                )}
-                            </span>
-
-                            <span class="time">
-                                ${escapeHTML(
-                                    notification.time
-                                )}
-                            </span>
-                        </div>
-
-                        <div class="notification-title">
-                            ${escapeHTML(
-                                notification.title
-                            )}
-                        </div>
-
-                        <div class="notification-message">
-                            ${escapeHTML(
-                                notification.message
-                            )}
-                        </div>
-
-                        <span class="read-label">
-                            ${
-                                notification.read
-                                    ? "Read"
-                                    : "Unread"
-                            }
-                        </span>
-                    `;
-
-                    element.addEventListener(
-                        "click",
-                        function () {
-
-                            notification.read =
-                                true;
-
-                            saveNotifications(
-                                notifications
-                            );
-
-                            renderNotifications();
-
-                            updateNotificationCount();
-
-                        }
-                    );
-
-                    notificationsContainer.appendChild(
-                        element
-                    );
-                }
-            );
-        }
-
-        /* =========================
-           UNREAD COUNT
-        ========================== */
-
-        function updateNotificationCount() {
+        function updateUnreadCount() {
 
             const notifications =
                 getNotifications();
 
             const unread =
                 notifications.filter(
-                    function (notification) {
-
-                        return !notification.read;
-
-                    }
+                    notification => !notification.read
                 ).length;
 
-            notificationCount.textContent =
-                unread;
+            const badge =
+                document.getElementById("unreadBadge");
 
-            notificationCount.style.display =
-                unread === 0
-                    ? "none"
-                    : "flex";
+            if (unread > 0) {
+
+                badge.textContent =
+                    unread > 99 ? "99+" : unread;
+
+                badge.style.display = "flex";
+
+            } else {
+
+                badge.style.display = "none";
+
+            }
         }
+
+
+        function renderNotifications() {
+
+            const container =
+                document.getElementById("notifications");
+
+            if (!container) return;
+
+            const notifications =
+                getNotifications();
+
+            if (notifications.length === 0) {
+
+                const language = getLanguage();
+
+                container.innerHTML = `
+                    <div class="emptyState">
+                        ${translations[language].empty}
+                    </div>
+                `;
+
+                return;
+            }
+
+            container.innerHTML =
+                notifications
+                .sort(
+                    (a, b) =>
+                        b.createdAt - a.createdAt
+                )
+                .map(notification => {
+
+                    const date =
+                        new Date(
+                            notification.createdAt
+                        );
+
+                    return `
+                        <div class="notification ${notification.read ? "" : "unread"}">
+
+                            <div class="notificationTop">
+
+                                <div>
+                                    <div class="notificationTitle">
+                                        ${escapeHTML(notification.title)}
+                                    </div>
+
+                                    <div class="notificationSender">
+                                        ${escapeHTML(notification.sender)}
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="notificationMessage">
+                                ${escapeHTML(notification.message)}
+                            </div>
+
+                            <div class="notificationTime">
+                                ${date.toLocaleString()}
+                            </div>
+
+                            ${
+                                !notification.read
+                                ? `
+                                    <div class="notificationActions">
+                                        <button
+                                            class="readButton"
+                                            onclick="markNotificationRead(${notification.id})"
+                                        >
+                                            Mark as read
+                                        </button>
+                                    </div>
+                                `
+                                : ""
+                            }
+
+                        </div>
+                    `;
+
+                })
+                .join("");
+
+        }
+
+
+        function markNotificationRead(id) {
+
+            const notifications =
+                getNotifications();
+
+            const notification =
+                notifications.find(
+                    item => item.id === id
+                );
+
+            if (notification) {
+                notification.read = true;
+            }
+
+            localStorage.setItem(
+                "notifications",
+                JSON.stringify(notifications)
+            );
+
+            renderNotifications();
+
+            updateUnreadCount();
+        }
+
+
+        function openInbox() {
+
+            renderNotifications();
+
+            document.getElementById("inboxModal")
+                .style.display = "flex";
+
+        }
+
+
+        function closeInbox() {
+
+            document.getElementById("inboxModal")
+                .style.display = "none";
+
+        }
+
+
+        /* =========================
+           AI ASSISTANT
+        ========================= */
+
+        function openAI() {
+
+            document.getElementById("aiModal")
+                .style.display = "flex";
+
+            document.getElementById("chatInput")
+                .focus();
+
+            renderChat();
+
+        }
+
+
+        function closeAI() {
+
+            document.getElementById("aiModal")
+                .style.display = "none";
+
+        }
+
+
+        function renderChat() {
+
+            const container =
+                document.getElementById("chatMessages");
+
+            if (chatMessages.length === 0) {
+
+                container.innerHTML = `
+                    <div class="chatMessage assistant">
+                        <div>
+                            <div class="chatName">
+                                AI Assistant
+                            </div>
+
+                            <div class="chatBubble">
+                                Hi! I'm your AI Assistant. Ask me anything.
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                return;
+            }
+
+            container.innerHTML =
+                chatMessages
+                .map(message => {
+
+                    const isUser =
+                        message.role === "user";
+
+                    return `
+                        <div class="chatMessage ${isUser ? "user" : "assistant"}">
+
+                            <div>
+
+                                ${
+                                    !isUser
+                                    ? `
+                                        <div class="chatName">
+                                            AI Assistant
+                                        </div>
+                                    `
+                                    : ""
+                                }
+
+                                <div class="chatBubble">
+                                    ${escapeHTML(message.content)}
+                                </div>
+
+                            </div>
+
+                        </div>
+                    `;
+
+                })
+                .join("");
+
+            container.scrollTop =
+                container.scrollHeight;
+        }
+
+
+        async function sendMessage() {
+
+            const input =
+                document.getElementById("chatInput");
+
+            const sendButton =
+                document.getElementById("sendButton");
+
+            const typing =
+                document.getElementById("typingIndicator");
+
+            const message =
+                input.value.trim();
+
+            if (!message) return;
+
+            chatMessages.push({
+                role: "user",
+                content: message
+            });
+
+            input.value = "";
+
+            renderChat();
+
+            sendButton.disabled = true;
+
+            typing.style.display = "block";
+
+            try {
+
+                const response =
+                    await fetch("/api/chat", {
+
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            messages: chatMessages
+                        })
+
+                    });
+
+                const data =
+                    await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.error ||
+                        "AI request failed."
+                    );
+                }
+
+                chatMessages.push({
+
+                    role: "assistant",
+
+                    content:
+                        data.reply ||
+                        "I couldn't generate a response."
+
+                });
+
+            } catch (error) {
+
+                console.error(error);
+
+                chatMessages.push({
+
+                    role: "assistant",
+
+                    content:
+                        "Sorry, something went wrong while contacting the AI."
+
+                });
+
+            } finally {
+
+                typing.style.display = "none";
+
+                sendButton.disabled = false;
+
+                renderChat();
+
+                input.focus();
+
+            }
+        }
+
+
+        /* =========================
+           ENTER TO SEND
+        ========================= */
+
+        document.getElementById("chatInput")
+            .addEventListener("keydown", function(event) {
+
+                if (
+                    event.key === "Enter" &&
+                    !event.shiftKey
+                ) {
+
+                    event.preventDefault();
+
+                    sendMessage();
+
+                }
+
+            });
+
+
+        /* =========================
+           MODAL CLOSE
+        ========================= */
+
+        function closeModalIfBackground(
+            event,
+            modalId
+        ) {
+
+            if (
+                event.target.id === modalId
+            ) {
+
+                document.getElementById(modalId)
+                    .style.display = "none";
+
+            }
+        }
+
 
         /* =========================
            HTML SAFETY
-        ========================== */
+        ========================= */
 
-        function escapeHTML(value) {
+        function escapeHTML(text) {
 
-            const div =
-                document.createElement(
-                    "div"
-                );
+            return String(text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
 
-            div.textContent =
-                String(value);
-
-            return div.innerHTML;
         }
 
-        /* =========================
-           EVENTS
-        ========================== */
-
-        loginButton.addEventListener(
-            "click",
-            login
-        );
-
-        passwordInput.addEventListener(
-            "keydown",
-            function (event) {
-
-                if (
-                    event.key ===
-                    "Enter"
-                ) {
-                    login();
-                }
-
-            }
-        );
-
-        usernameInput.addEventListener(
-            "keydown",
-            function (event) {
-
-                if (
-                    event.key ===
-                    "Enter"
-                ) {
-                    login();
-                }
-
-            }
-        );
-
-        inboxButton.addEventListener(
-            "click",
-            function () {
-
-                renderNotifications();
-
-                inboxPanel.classList.add(
-                    "open"
-                );
-
-            }
-        );
-
-        closeInbox.addEventListener(
-            "click",
-            function () {
-
-                inboxPanel.classList.remove(
-                    "open"
-                );
-
-            }
-        );
-
-        logoutButton.addEventListener(
-            "click",
-            logout
-        );
 
         /* =========================
            START APPLICATION
-        ========================== */
+        ========================= */
 
         function startApplication() {
 
-            runLoadingScreen(
-                function () {
+            runLoadingScreen(() => {
 
-                    const savedUser =
-                        localStorage.getItem(
-                            "loggedInUser"
-                        );
+                const savedUser =
+                    localStorage.getItem(
+                        "loggedInUser"
+                    );
 
-                    if (
-                        savedUser === "landon" ||
-                        savedUser === "mama"
-                    ) {
+                if (
+                    savedUser &&
+                    accounts[savedUser]
+                ) {
 
-                        const account =
-                            accounts[savedUser];
+                    currentUser = {
 
-                        loginPage.style.display =
-                            "none";
+                        username: savedUser,
 
-                        /*
-                         * Logged-in users get the
-                         * second loading screen.
-                         */
-                        runLoadingScreen(
-                            function () {
+                        displayName:
+                            accounts[savedUser]
+                            .displayName
 
-                                updateGreeting(
-                                    account.displayName
-                                );
+                    };
 
-                                accountName.textContent =
-                                    savedUser ===
-                                    "landon"
-                                        ? "Personal Inbox"
-                                        : "Mama's Inbox";
+                    runLoadingScreen(() => {
 
-                                dashboard.classList.add(
-                                    "visible"
-                                );
+                        showDashboard();
 
-                                if (
-                                    savedUser ===
-                                    "landon"
-                                ) {
+                    });
 
-                                    createSystemNotification();
+                } else {
 
-                                    updateNotificationCount();
-                                }
+                    document.getElementById(
+                        "loginPage"
+                    ).style.display = "flex";
 
-                            }
-                        );
-
-                        return;
-                    }
-
-                    loginPage.style.display =
-                        "flex";
                 }
-            );
+
+            });
+
         }
 
+
         startApplication();
+
     </script>
 
 </body>
 </html>
-```
