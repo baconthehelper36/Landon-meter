@@ -1,0 +1,38 @@
+const webpush = require("web-push");
+
+module.exports = async (req, res) => {
+    if (req.method !== "POST") {
+        return res.status(405).json({
+            error: "Method not allowed"
+        });
+    }
+
+    try {
+        const { subscription, username } = req.body;
+
+        if (!subscription || !username) {
+            return res.status(400).json({
+                error: "Missing subscription or username"
+            });
+        }
+
+        // Temporary response.
+        // We'll connect this to shared storage in the next step.
+        console.log("Push subscription received:", {
+            username,
+            subscription
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Device registered successfully"
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            error: "Failed to register device"
+        });
+    }
+};
