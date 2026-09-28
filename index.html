@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -309,57 +308,6 @@
         }
 
         /* =========================
-           SYSTEM TEST PANEL
-        ========================= */
-
-        .systemPanel {
-            display: none;
-            margin: 30px auto 0;
-            width: min(650px, 100%);
-            background: #101621;
-            border: 1px solid rgba(97,168,255,0.2);
-            border-radius: 16px;
-            padding: 20px;
-            text-align: left;
-        }
-
-        .systemPanel h3 {
-            margin-bottom: 7px;
-            font-size: 18px;
-        }
-
-        .systemPanel p {
-            color: #8996aa;
-            font-size: 13px;
-            margin-bottom: 15px;
-        }
-
-        .testButtons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .testButton {
-            background: #1d2d44;
-            border: 1px solid #304967;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 9px;
-            cursor: pointer;
-        }
-
-        .testButton:hover {
-            background: #294565;
-        }
-
-        .testStatus {
-            margin-top: 12px;
-            color: #8fa1ba;
-            font-size: 13px;
-        }
-
-        /* =========================
            MODALS
         ========================= */
 
@@ -624,7 +572,6 @@
         }
 
         @media (max-width: 650px) {
-
             .topbar {
                 padding: 0 15px;
             }
@@ -664,44 +611,22 @@
 
 <body>
 
-    <!-- =========================
-         LOADING
-    ========================= -->
-
     <div id="loadingScreen">
-
         <div class="loadingBox">
-
-            <div class="loadingTitle">
-                PERSONAL
-            </div>
+            <div class="loadingTitle">PERSONAL</div>
 
             <div class="spinner"></div>
 
-            <div
-                class="loadingText"
-                id="loadingText"
-            >
+            <div class="loadingText" id="loadingText">
                 Starting up...
             </div>
 
             <div class="progress">
-
-                <div
-                    class="progressBar"
-                    id="progressBar"
-                ></div>
-
+                <div class="progressBar" id="progressBar"></div>
             </div>
-
         </div>
-
     </div>
 
-
-    <!-- =========================
-         LOGIN
-    ========================= -->
 
     <div id="loginPage">
 
@@ -709,15 +634,10 @@
 
             <h1>Welcome back</h1>
 
-            <p>
-                Sign in to continue to your dashboard.
-            </p>
+            <p>Sign in to continue to your dashboard.</p>
 
             <div class="inputGroup">
-
-                <label>
-                    Username
-                </label>
+                <label>Username</label>
 
                 <input
                     type="text"
@@ -725,14 +645,10 @@
                     autocomplete="username"
                     placeholder="Enter username"
                 >
-
             </div>
 
             <div class="inputGroup">
-
-                <label>
-                    Password
-                </label>
+                <label>Password</label>
 
                 <input
                     type="password"
@@ -740,20 +656,13 @@
                     autocomplete="current-password"
                     placeholder="Enter password"
                 >
-
             </div>
 
-            <button
-                class="loginButton"
-                onclick="login()"
-            >
+            <button class="loginButton" onclick="login()">
                 Login
             </button>
 
-            <div
-                class="loginError"
-                id="loginError"
-            >
+            <div class="loginError" id="loginError">
                 Incorrect username or password.
             </div>
 
@@ -762,18 +671,11 @@
     </div>
 
 
-    <!-- =========================
-         DASHBOARD
-    ========================= -->
-
     <div id="dashboard">
 
         <div class="topbar">
 
-            <div
-                class="greeting"
-                id="greeting"
-            >
+            <div class="greeting" id="greeting">
                 Good afternoon
             </div>
 
@@ -785,45 +687,17 @@
                     onchange="changeLanguage()"
                     title="Website language"
                 >
-
-                    <option value="en">
-                        English
-                    </option>
-
-                    <option value="id">
-                        Bahasa Indonesia
-                    </option>
-
-                    <option value="es">
-                        Español
-                    </option>
-
-                    <option value="fr">
-                        Français
-                    </option>
-
-                    <option value="de">
-                        Deutsch
-                    </option>
-
-                    <option value="zh">
-                        中文
-                    </option>
-
-                    <option value="ja">
-                        日本語
-                    </option>
-
-                    <option value="ko">
-                        한국어
-                    </option>
-
+                    <option value="en">English</option>
+                    <option value="id">Bahasa Indonesia</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="de">Deutsch</option>
+                    <option value="zh">中文</option>
+                    <option value="ja">日本語</option>
+                    <option value="ko">한국어</option>
                 </select>
 
-                <button
-                    class="logoutButton"
-                    onclick="logout()"
-                >
+                <button class="logoutButton" onclick="logout()">
                     Logout
                 </button>
 
@@ -840,10 +714,7 @@
                     What would you like to do?
                 </h2>
 
-
                 <div class="dashboardButtons">
-
-                    <!-- INBOX -->
 
                     <div style="position: relative;">
 
@@ -851,10 +722,7 @@
                             class="dashboardButton"
                             onclick="openInbox()"
                         >
-
-                            <span class="buttonIcon">
-                                📨
-                            </span>
+                            <span class="buttonIcon">📨</span>
 
                             <span
                                 class="buttonTitle"
@@ -869,9 +737,7 @@
                             >
                                 Your notifications
                             </span>
-
                         </button>
-
 
                         <div
                             class="unreadBadge"
@@ -883,16 +749,12 @@
                     </div>
 
 
-                    <!-- AI -->
-
                     <button
                         class="dashboardButton"
+                        id="secondDashboardButton"
                         onclick="openAI()"
                     >
-
-                        <span class="buttonIcon">
-                            🤖
-                        </span>
+                        <span class="buttonIcon">🤖</span>
 
                         <span
                             class="buttonTitle"
@@ -907,58 +769,7 @@
                         >
                             Ask me anything
                         </span>
-
                     </button>
-
-                </div>
-
-
-                <!-- =========================
-                     SYSTEM TEST PANEL
-                ========================= -->
-
-                <div
-                    class="systemPanel"
-                    id="systemPanel"
-                >
-
-                    <h3>
-                        System Notification Tester
-                    </h3>
-
-                    <p>
-                        Use these buttons to test the food notification flow without waiting for the scheduled time.
-                    </p>
-
-                    <div class="testButtons">
-
-                        <button
-                            class="testButton"
-                            onclick="testNotification('breakfast')"
-                        >
-                            🍳 Test Breakfast
-                        </button>
-
-                        <button
-                            class="testButton"
-                            onclick="testNotification('lunch')"
-                        >
-                            🍱 Test Lunch
-                        </button>
-
-                        <button
-                            class="testButton"
-                            onclick="testNotification('dinner')"
-                        >
-                            🍽️ Test Dinner
-                        </button>
-
-                    </div>
-
-                    <div
-                        class="testStatus"
-                        id="testStatus"
-                    ></div>
 
                 </div>
 
@@ -1000,6 +811,84 @@
                 class="notifications"
                 id="notifications"
             ></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         SYSTEM TESTER MODAL
+    ========================= -->
+
+    <div
+        class="modalOverlay"
+        id="systemModal"
+        onclick="closeModalIfBackground(event, 'systemModal')"
+    >
+
+        <div class="modal">
+
+            <div class="modalHeader">
+
+                <h2>
+                    System Tester
+                </h2>
+
+                <button
+                    class="closeButton"
+                    onclick="closeSystemTester()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+            <div class="notifications">
+
+                <div class="notification">
+
+                    <div class="notificationTitle">
+                        Test Food Notifications
+                    </div>
+
+                    <div class="notificationMessage">
+                        Use these buttons to immediately test the food notification system.
+                    </div>
+
+                    <div class="notificationActions">
+
+                        <button
+                            class="answerButton"
+                            onclick="runSystemTest('breakfast')"
+                        >
+                            Test Breakfast
+                        </button>
+
+                        <button
+                            class="answerButton"
+                            onclick="runSystemTest('lunch')"
+                        >
+                            Test Lunch
+                        </button>
+
+                        <button
+                            class="answerButton"
+                            onclick="runSystemTest('dinner')"
+                        >
+                            Test Dinner
+                        </button>
+
+                    </div>
+
+                    <div
+                        class="answerStatus"
+                        id="systemTestStatus"
+                    ></div>
+
+                </div>
+
+            </div>
 
         </div>
 
@@ -1110,9 +999,7 @@
             "BHpapDcdOL1jssjCsGOaz7QbRFS_LihJPCvvZdKfobckvd_t-AkxgQ4YhS7QGg-Qm8ktWcgTgyl2i1iE_tQMOkk";
 
 
-        function urlBase64ToUint8Array(
-            base64String
-        ) {
+        function urlBase64ToUint8Array(base64String) {
 
             const padding =
                 "=".repeat(
@@ -1120,10 +1007,7 @@
                 );
 
             const base64 =
-                (
-                    base64String +
-                    padding
-                )
+                (base64String + padding)
                     .replace(/-/g, "+")
                     .replace(/_/g, "/");
 
@@ -1132,8 +1016,7 @@
 
             return Uint8Array.from(
                 [...rawData].map(
-                    char =>
-                        char.charCodeAt(0)
+                    char => char.charCodeAt(0)
                 )
             );
         }
@@ -1146,7 +1029,6 @@
                 !("PushManager" in window) ||
                 !("Notification" in window)
             ) {
-
                 console.log(
                     "Push notifications are not supported."
                 );
@@ -1164,18 +1046,14 @@
                 let permission =
                     Notification.permission;
 
-                if (
-                    permission === "default"
-                ) {
+                if (permission === "default") {
 
                     permission =
                         await Notification.requestPermission();
 
                 }
 
-                if (
-                    permission !== "granted"
-                ) {
+                if (permission !== "granted") {
 
                     console.log(
                         "Notification permission was not granted."
@@ -1203,28 +1081,24 @@
 
                 }
 
-                await fetch(
-                    "/api/subscribe",
-                    {
+                await fetch("/api/subscribe", {
 
-                        method: "POST",
+                    method: "POST",
 
-                        headers: {
-                            "Content-Type":
-                                "application/json"
-                        },
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
 
-                        body: JSON.stringify({
+                    body: JSON.stringify({
 
-                            username:
-                                currentUser.username,
+                        username:
+                            currentUser.username,
 
-                            subscription
+                        subscription
 
-                        })
+                    })
 
-                    }
-                );
+                });
 
                 console.log(
                     "Push notifications connected."
@@ -1248,453 +1122,188 @@
         const translations = {
 
             en: {
-                dashboard:
-                    "What would you like to do?",
-
-                inbox:
-                    "Inbox",
-
-                inboxSub:
-                    "Your notifications",
-
-                ai:
-                    "AI Assistant",
-
-                aiSub:
-                    "Ask me anything",
-
-                logout:
-                    "Logout",
-
-                inboxTitle:
-                    "Inbox",
-
-                aiTitle:
-                    "AI Assistant",
-
-                send:
-                    "Send",
-
-                placeholder:
-                    "Ask me anything...",
-
-                thinking:
-                    "AI is thinking...",
-
-                empty:
-                    "No notifications yet.",
-
-                yes:
-                    "Yes",
-
-                no:
-                    "No",
-
-                whatDidYouEat:
-                    "What did you eat?",
-
-                submit:
-                    "Submit",
-
-                saving:
-                    "Saving...",
-
-                answered:
-                    "Answer saved."
+                dashboard: "What would you like to do?",
+                inbox: "Inbox",
+                inboxSub: "Your notifications",
+                ai: "AI Assistant",
+                aiSub: "Ask me anything",
+                logout: "Logout",
+                inboxTitle: "Inbox",
+                aiTitle: "AI Assistant",
+                send: "Send",
+                placeholder: "Ask me anything...",
+                thinking: "AI is thinking...",
+                welcome: "Welcome to your new inbox.",
+                systemWelcome: "Welcome!",
+                empty: "No notifications yet.",
+                yes: "Yes",
+                no: "No",
+                whatDidYouEat: "What did you eat?",
+                submit: "Submit",
+                saving: "Saving...",
+                answered: "Answer saved."
             },
 
             id: {
-                dashboard:
-                    "Apa yang ingin kamu lakukan?",
-
-                inbox:
-                    "Kotak Masuk",
-
-                inboxSub:
-                    "Notifikasi kamu",
-
-                ai:
-                    "Asisten AI",
-
-                aiSub:
-                    "Tanyakan apa saja",
-
-                logout:
-                    "Keluar",
-
-                inboxTitle:
-                    "Kotak Masuk",
-
-                aiTitle:
-                    "Asisten AI",
-
-                send:
-                    "Kirim",
-
-                placeholder:
-                    "Tanyakan apa saja...",
-
-                thinking:
-                    "AI sedang berpikir...",
-
-                empty:
-                    "Belum ada notifikasi.",
-
-                yes:
-                    "Ya",
-
-                no:
-                    "Tidak",
-
-                whatDidYouEat:
-                    "Apa yang kamu makan?",
-
-                submit:
-                    "Kirim",
-
-                saving:
-                    "Menyimpan...",
-
-                answered:
-                    "Jawaban tersimpan."
+                dashboard: "Apa yang ingin kamu lakukan?",
+                inbox: "Kotak Masuk",
+                inboxSub: "Notifikasi kamu",
+                ai: "Asisten AI",
+                aiSub: "Tanyakan apa saja",
+                logout: "Keluar",
+                inboxTitle: "Kotak Masuk",
+                aiTitle: "Asisten AI",
+                send: "Kirim",
+                placeholder: "Tanyakan apa saja...",
+                thinking: "AI sedang berpikir...",
+                welcome: "Selamat datang di kotak masuk baru kamu.",
+                systemWelcome: "Selamat datang!",
+                empty: "Belum ada notifikasi.",
+                yes: "Ya",
+                no: "Tidak",
+                whatDidYouEat: "Apa yang kamu makan?",
+                submit: "Kirim",
+                saving: "Menyimpan...",
+                answered: "Jawaban tersimpan."
             },
 
             es: {
-                dashboard:
-                    "¿Qué te gustaría hacer?",
-
-                inbox:
-                    "Bandeja",
-
-                inboxSub:
-                    "Tus notificaciones",
-
-                ai:
-                    "Asistente IA",
-
-                aiSub:
-                    "Pregúntame lo que quieras",
-
-                logout:
-                    "Cerrar sesión",
-
-                inboxTitle:
-                    "Bandeja",
-
-                aiTitle:
-                    "Asistente IA",
-
-                send:
-                    "Enviar",
-
-                placeholder:
-                    "Pregúntame lo que quieras...",
-
-                thinking:
-                    "La IA está pensando...",
-
-                empty:
-                    "No hay notificaciones.",
-
-                yes:
-                    "Sí",
-
-                no:
-                    "No",
-
-                whatDidYouEat:
-                    "¿Qué comiste?",
-
-                submit:
-                    "Enviar",
-
-                saving:
-                    "Guardando...",
-
-                answered:
-                    "Respuesta guardada."
+                dashboard: "¿Qué te gustaría hacer?",
+                inbox: "Bandeja",
+                inboxSub: "Tus notificaciones",
+                ai: "Asistente IA",
+                aiSub: "Pregúntame lo que quieras",
+                logout: "Cerrar sesión",
+                inboxTitle: "Bandeja",
+                aiTitle: "Asistente IA",
+                send: "Enviar",
+                placeholder: "Pregúntame lo que quieras...",
+                thinking: "La IA está pensando...",
+                welcome: "Bienvenido a tu nueva bandeja.",
+                systemWelcome: "¡Bienvenido!",
+                empty: "No hay notificaciones.",
+                yes: "Sí",
+                no: "No",
+                whatDidYouEat: "¿Qué comiste?",
+                submit: "Enviar",
+                saving: "Guardando...",
+                answered: "Respuesta guardada."
             },
 
             fr: {
-                dashboard:
-                    "Que souhaitez-vous faire ?",
-
-                inbox:
-                    "Boîte de réception",
-
-                inboxSub:
-                    "Vos notifications",
-
-                ai:
-                    "Assistant IA",
-
-                aiSub:
-                    "Demandez-moi n'importe quoi",
-
-                logout:
-                    "Déconnexion",
-
-                inboxTitle:
-                    "Boîte de réception",
-
-                aiTitle:
-                    "Assistant IA",
-
-                send:
-                    "Envoyer",
-
-                placeholder:
-                    "Demandez-moi n'importe quoi...",
-
-                thinking:
-                    "L'IA réfléchit...",
-
-                empty:
-                    "Aucune notification.",
-
-                yes:
-                    "Oui",
-
-                no:
-                    "Non",
-
-                whatDidYouEat:
-                    "Qu'avez-vous mangé ?",
-
-                submit:
-                    "Envoyer",
-
-                saving:
-                    "Enregistrement...",
-
-                answered:
-                    "Réponse enregistrée."
+                dashboard: "Que souhaitez-vous faire ?",
+                inbox: "Boîte de réception",
+                inboxSub: "Vos notifications",
+                ai: "Assistant IA",
+                aiSub: "Demandez-moi n'importe quoi",
+                logout: "Déconnexion",
+                inboxTitle: "Boîte de réception",
+                aiTitle: "Assistant IA",
+                send: "Envoyer",
+                placeholder: "Demandez-moi n'importe quoi...",
+                thinking: "L'IA réfléchit...",
+                welcome: "Bienvenue dans votre nouvelle boîte de réception.",
+                systemWelcome: "Bienvenue !",
+                empty: "Aucune notification.",
+                yes: "Oui",
+                no: "Non",
+                whatDidYouEat: "Qu'avez-vous mangé ?",
+                submit: "Envoyer",
+                saving: "Enregistrement...",
+                answered: "Réponse enregistrée."
             },
 
             de: {
-                dashboard:
-                    "Was möchtest du tun?",
-
-                inbox:
-                    "Posteingang",
-
-                inboxSub:
-                    "Deine Benachrichtigungen",
-
-                ai:
-                    "KI-Assistent",
-
-                aiSub:
-                    "Frag mich alles",
-
-                logout:
-                    "Abmelden",
-
-                inboxTitle:
-                    "Posteingang",
-
-                aiTitle:
-                    "KI-Assistent",
-
-                send:
-                    "Senden",
-
-                placeholder:
-                    "Frag mich alles...",
-
-                thinking:
-                    "Die KI denkt nach...",
-
-                empty:
-                    "Noch keine Benachrichtigungen.",
-
-                yes:
-                    "Ja",
-
-                no:
-                    "Nein",
-
-                whatDidYouEat:
-                    "Was hast du gegessen?",
-
-                submit:
-                    "Senden",
-
-                saving:
-                    "Speichern...",
-
-                answered:
-                    "Antwort gespeichert."
+                dashboard: "Was möchtest du tun?",
+                inbox: "Posteingang",
+                inboxSub: "Deine Benachrichtigungen",
+                ai: "KI-Assistent",
+                aiSub: "Frag mich alles",
+                logout: "Abmelden",
+                inboxTitle: "Posteingang",
+                aiTitle: "KI-Assistent",
+                send: "Senden",
+                placeholder: "Frag mich alles...",
+                thinking: "Die KI denkt nach...",
+                welcome: "Willkommen in deinem neuen Posteingang.",
+                systemWelcome: "Willkommen!",
+                empty: "Noch keine Benachrichtigungen.",
+                yes: "Ja",
+                no: "Nein",
+                whatDidYouEat: "Was hast du gegessen?",
+                submit: "Senden",
+                saving: "Speichern...",
+                answered: "Antwort gespeichert."
             },
 
             zh: {
-                dashboard:
-                    "你想做什么？",
-
-                inbox:
-                    "收件箱",
-
-                inboxSub:
-                    "你的通知",
-
-                ai:
-                    "AI 助手",
-
-                aiSub:
-                    "问我任何问题",
-
-                logout:
-                    "退出登录",
-
-                inboxTitle:
-                    "收件箱",
-
-                aiTitle:
-                    "AI 助手",
-
-                send:
-                    "发送",
-
-                placeholder:
-                    "问我任何问题...",
-
-                thinking:
-                    "AI 正在思考...",
-
-                empty:
-                    "暂无通知。",
-
-                yes:
-                    "是",
-
-                no:
-                    "否",
-
-                whatDidYouEat:
-                    "你吃了什么？",
-
-                submit:
-                    "提交",
-
-                saving:
-                    "保存中...",
-
-                answered:
-                    "答案已保存。"
+                dashboard: "你想做什么？",
+                inbox: "收件箱",
+                inboxSub: "你的通知",
+                ai: "AI 助手",
+                aiSub: "问我任何问题",
+                logout: "退出登录",
+                inboxTitle: "收件箱",
+                aiTitle: "AI 助手",
+                send: "发送",
+                placeholder: "问我任何问题...",
+                thinking: "AI 正在思考...",
+                welcome: "欢迎来到你的新收件箱。",
+                systemWelcome: "欢迎！",
+                empty: "暂无通知。",
+                yes: "是",
+                no: "否",
+                whatDidYouEat: "你吃了什么？",
+                submit: "提交",
+                saving: "保存中...",
+                answered: "答案已保存。"
             },
 
             ja: {
-                dashboard:
-                    "何をしますか？",
-
-                inbox:
-                    "受信トレイ",
-
-                inboxSub:
-                    "あなたの通知",
-
-                ai:
-                    "AIアシスタント",
-
-                aiSub:
-                    "何でも聞いてください",
-
-                logout:
-                    "ログアウト",
-
-                inboxTitle:
-                    "受信トレイ",
-
-                aiTitle:
-                    "AIアシスタント",
-
-                send:
-                    "送信",
-
-                placeholder:
-                    "何でも聞いてください...",
-
-                thinking:
-                    "AIが考えています...",
-
-                empty:
-                    "通知はありません。",
-
-                yes:
-                    "はい",
-
-                no:
-                    "いいえ",
-
-                whatDidYouEat:
-                    "何を食べましたか？",
-
-                submit:
-                    "送信",
-
-                saving:
-                    "保存中...",
-
-                answered:
-                    "回答を保存しました。"
+                dashboard: "何をしますか？",
+                inbox: "受信トレイ",
+                inboxSub: "あなたの通知",
+                ai: "AIアシスタント",
+                aiSub: "何でも聞いてください",
+                logout: "ログアウト",
+                inboxTitle: "受信トレイ",
+                aiTitle: "AIアシスタント",
+                send: "送信",
+                placeholder: "何でも聞いてください...",
+                thinking: "AIが考えています...",
+                welcome: "新しい受信トレイへようこそ。",
+                systemWelcome: "ようこそ！",
+                empty: "通知はありません。",
+                yes: "はい",
+                no: "いいえ",
+                whatDidYouEat: "何を食べましたか？",
+                submit: "送信",
+                saving: "保存中...",
+                answered: "回答を保存しました。"
             },
 
             ko: {
-                dashboard:
-                    "무엇을 하시겠어요?",
-
-                inbox:
-                    "받은 편지함",
-
-                inboxSub:
-                    "알림",
-
-                ai:
-                    "AI 어시스턴트",
-
-                aiSub:
-                    "무엇이든 물어보세요",
-
-                logout:
-                    "로그아웃",
-
-                inboxTitle:
-                    "받은 편지함",
-
-                aiTitle:
-                    "AI 어시스턴트",
-
-                send:
-                    "보내기",
-
-                placeholder:
-                    "무엇이든 물어보세요...",
-
-                thinking:
-                    "AI가 생각하고 있습니다...",
-
-                empty:
-                    "알림이 없습니다.",
-
-                yes:
-                    "예",
-
-                no:
-                    "아니요",
-
-                whatDidYouEat:
-                    "무엇을 먹었나요?",
-
-                submit:
-                    "제출",
-
-                saving:
-                    "저장 중...",
-
-                answered:
-                    "답변이 저장되었습니다."
+                dashboard: "무엇을 하시겠어요?",
+                inbox: "받은 편지함",
+                inboxSub: "알림",
+                ai: "AI 어시스턴트",
+                aiSub: "무엇이든 물어보세요",
+                logout: "로그아웃",
+                inboxTitle: "받은 편지함",
+                aiTitle: "AI 어시스턴트",
+                send: "보내기",
+                placeholder: "무엇이든 물어보세요...",
+                thinking: "AI가 생각하고 있습니다...",
+                welcome: "새 받은 편지함에 오신 것을 환영합니다.",
+                systemWelcome: "환영합니다.",
+                empty: "알림이 없습니다.",
+                yes: "예",
+                no: "아니요",
+                whatDidYouEat: "무엇을 먹었나요?",
+                submit: "제출",
+                saving: "저장 중...",
+                answered: "답변이 저장되었습니다."
             }
-
         };
 
 
@@ -1702,92 +1311,68 @@
            LOADING
         ========================= */
 
-        function runLoadingScreen(
-            callback
-        ) {
+        function runLoadingScreen(callback) {
 
             const loadingScreen =
-                document.getElementById(
-                    "loadingScreen"
-                );
+                document.getElementById("loadingScreen");
 
             const progressBar =
-                document.getElementById(
-                    "progressBar"
-                );
+                document.getElementById("progressBar");
 
             const loadingText =
-                document.getElementById(
-                    "loadingText"
-                );
+                document.getElementById("loadingText");
 
             const messages = [
-
                 "Starting up...",
-
                 "Preparing dashboard...",
-
                 "Loading your account...",
-
                 "Almost ready..."
-
             ];
 
             let progress = 0;
 
-            loadingScreen.style.display =
-                "flex";
+            loadingScreen.style.display = "flex";
+            loadingScreen.style.opacity = "1";
 
-            loadingScreen.style.opacity =
-                "1";
+            const interval = setInterval(() => {
 
-            const interval =
-                setInterval(() => {
+                progress += 5;
 
-                    progress += 5;
+                progressBar.style.width =
+                    progress + "%";
 
-                    progressBar.style.width =
-                        progress + "%";
+                const index =
+                    Math.min(
+                        Math.floor(progress / 25),
+                        messages.length - 1
+                    );
 
-                    const index =
-                        Math.min(
-                            Math.floor(
-                                progress / 25
-                            ),
-                            messages.length - 1
-                        );
+                loadingText.textContent =
+                    messages[index];
 
-                    loadingText.textContent =
-                        messages[index];
+                if (progress >= 100) {
 
-                    if (progress >= 100) {
+                    clearInterval(interval);
 
-                        clearInterval(
-                            interval
-                        );
+                    setTimeout(() => {
+
+                        loadingScreen.style.opacity = "0";
 
                         setTimeout(() => {
 
-                            loadingScreen.style.opacity =
-                                "0";
+                            loadingScreen.style.display =
+                                "none";
 
-                            setTimeout(() => {
+                            if (callback) {
+                                callback();
+                            }
 
-                                loadingScreen.style.display =
-                                    "none";
+                        }, 600);
 
-                                if (callback) {
-                                    callback();
-                                }
+                    }, 250);
+                }
 
-                            }, 600);
-
-                        }, 250);
-
-                    }
-
-                }, 70);
-
+            }, 70);
         }
 
 
@@ -1800,46 +1385,19 @@
             const hour =
                 new Date().getHours();
 
-            if (
-                hour >= 5 &&
-                hour < 12
-            ) {
-
-                return (
-                    "Good morning " +
-                    name
-                );
-
+            if (hour >= 5 && hour < 12) {
+                return "Good morning " + name;
             }
 
-            if (
-                hour >= 12 &&
-                hour < 18
-            ) {
-
-                return (
-                    "Good afternoon " +
-                    name
-                );
-
+            if (hour >= 12 && hour < 18) {
+                return "Good afternoon " + name;
             }
 
-            if (
-                hour >= 18 &&
-                hour < 22
-            ) {
-
-                return (
-                    "Good evening " +
-                    name
-                );
-
+            if (hour >= 18 && hour < 22) {
+                return "Good evening " + name;
             }
 
-            return (
-                "Good night " +
-                name
-            );
+            return "Good night " + name;
         }
 
 
@@ -1850,38 +1408,27 @@
         function login() {
 
             const username =
-                document.getElementById(
-                    "username"
-                )
+                document.getElementById("username")
                     .value
                     .trim()
                     .toLowerCase();
 
             const password =
-                document.getElementById(
-                    "password"
-                ).value;
+                document.getElementById("password")
+                    .value;
 
             const error =
-                document.getElementById(
-                    "loginError"
-                );
+                document.getElementById("loginError");
 
             if (
                 accounts[username] &&
-                accounts[username].password ===
-                    password
+                accounts[username].password === password
             ) {
 
                 currentUser = {
-
                     username,
-
                     displayName:
-                        accounts[
-                            username
-                        ].displayName
-
+                        accounts[username].displayName
                 };
 
                 localStorage.setItem(
@@ -1889,13 +1436,11 @@
                     username
                 );
 
-                error.style.display =
-                    "none";
+                error.style.display = "none";
 
                 document.getElementById(
                     "loginPage"
-                ).style.display =
-                    "none";
+                ).style.display = "none";
 
                 runLoadingScreen(() => {
 
@@ -1905,11 +1450,9 @@
 
             } else {
 
-                error.style.display =
-                    "block";
+                error.style.display = "block";
 
             }
-
         }
 
 
@@ -1921,27 +1464,26 @@
 
             document.getElementById(
                 "dashboard"
-            ).style.display =
-                "block";
+            ).style.display = "block";
 
             updateGreeting();
 
             loadLanguage();
 
-            setupSystemPanel();
+            createSystemNotification();
 
             loadNotifications();
 
             setupPushNotifications();
+
+            setupSystemDashboard();
 
         }
 
 
         function updateGreeting() {
 
-            if (!currentUser) {
-                return;
-            }
+            if (!currentUser) return;
 
             document.getElementById(
                 "greeting"
@@ -1949,109 +1491,43 @@
                 getGreeting(
                     currentUser.displayName
                 );
-
         }
 
 
         /* =========================
-           SYSTEM PANEL
+           SYSTEM DASHBOARD
         ========================= */
 
-        function setupSystemPanel() {
+        function setupSystemDashboard() {
 
-            const panel =
+            const button =
                 document.getElementById(
-                    "systemPanel"
+                    "secondDashboardButton"
                 );
 
-            if (!panel) return;
-
-            if (
-                currentUser &&
-                currentUser.username ===
-                    "system"
-            ) {
-
-                panel.style.display =
-                    "block";
-
-            } else {
-
-                panel.style.display =
-                    "none";
-
-            }
-
-        }
-
-
-        async function testNotification(
-            type
-        ) {
-
-            if (
-                !currentUser ||
-                currentUser.username !==
-                    "system"
-            ) {
+            if (!button || !currentUser) {
                 return;
             }
 
-            const status =
-                document.getElementById(
-                    "testStatus"
-                );
+            if (
+                currentUser.username ===
+                "system"
+            ) {
 
-            status.textContent =
-                "Sending test " +
-                type +
-                " notification...";
+                button.onclick =
+                    openSystemTester;
 
-            try {
+                button.innerHTML = `
+                    <span class="buttonIcon">🧪</span>
 
-                /*
-                 * This calls the notification
-                 * backend in test mode.
-                 */
+                    <span class="buttonTitle">
+                        System Tester
+                    </span>
 
-                const response =
-                    await fetch(
-                        "/api/notifications?test=" +
-                        encodeURIComponent(type),
-                        {
-                            method: "GET"
-                        }
-                    );
-
-                const data =
-                    await response.json();
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        data.error ||
-                        "Test notification failed."
-                    );
-
-                }
-
-                status.textContent =
-                    "Test " +
-                    type +
-                    " notification sent.";
-
-                await loadNotifications();
-
-            } catch (error) {
-
-                console.error(
-                    "Test notification error:",
-                    error
-                );
-
-                status.textContent =
-                    "Test failed: " +
-                    error.message;
+                    <span class="buttonSub">
+                        Test notifications
+                    </span>
+                `;
 
             }
 
@@ -2064,12 +1540,9 @@
 
         function getLanguage() {
 
-            return (
-                localStorage.getItem(
-                    "selectedLanguage"
-                ) || "en"
-            );
-
+            return localStorage.getItem(
+                "selectedLanguage"
+            ) || "en";
         }
 
 
@@ -2086,7 +1559,6 @@
             );
 
             updateLanguage();
-
         }
 
 
@@ -2101,7 +1573,6 @@
                 getLanguage();
 
             updateLanguage();
-
         }
 
 
@@ -2116,61 +1587,49 @@
 
             document.getElementById(
                 "dashboardTitle"
-            ).textContent =
-                t.dashboard;
+            ).textContent = t.dashboard;
 
             document.getElementById(
                 "inboxButtonText"
-            ).textContent =
-                t.inbox;
+            ).textContent = t.inbox;
 
             document.getElementById(
                 "inboxSubText"
-            ).textContent =
-                t.inboxSub;
+            ).textContent = t.inboxSub;
 
             document.getElementById(
                 "aiButtonText"
-            ).textContent =
-                t.ai;
+            ).textContent = t.ai;
 
             document.getElementById(
                 "aiSubText"
-            ).textContent =
-                t.aiSub;
+            ).textContent = t.aiSub;
 
             document.querySelector(
                 ".logoutButton"
-            ).textContent =
-                t.logout;
+            ).textContent = t.logout;
 
             document.getElementById(
                 "inboxTitle"
-            ).textContent =
-                t.inboxTitle;
+            ).textContent = t.inboxTitle;
 
             document.getElementById(
                 "aiTitle"
-            ).textContent =
-                t.aiTitle;
+            ).textContent = t.aiTitle;
 
             document.getElementById(
                 "sendButton"
-            ).textContent =
-                t.send;
+            ).textContent = t.send;
 
             document.getElementById(
                 "chatInput"
-            ).placeholder =
-                t.placeholder;
+            ).placeholder = t.placeholder;
 
             document.getElementById(
                 "typingIndicator"
-            ).textContent =
-                t.thinking;
+            ).textContent = t.thinking;
 
             renderNotifications();
-
         }
 
 
@@ -2188,33 +1647,27 @@
 
             document.getElementById(
                 "dashboard"
-            ).style.display =
-                "none";
+            ).style.display = "none";
 
             document.getElementById(
                 "loginPage"
-            ).style.display =
-                "none";
+            ).style.display = "none";
 
             runLoadingScreen(() => {
 
                 document.getElementById(
                     "loginPage"
-                ).style.display =
-                    "flex";
+                ).style.display = "flex";
 
                 document.getElementById(
                     "username"
-                ).value =
-                    "";
+                ).value = "";
 
                 document.getElementById(
                     "password"
-                ).value =
-                    "";
+                ).value = "";
 
             });
-
         }
 
 
@@ -2222,11 +1675,28 @@
            SHARED NOTIFICATIONS
         ========================= */
 
-        async function loadNotifications() {
+        function createSystemNotification() {
 
-            if (!currentUser) {
+            const key =
+                "systemWelcomeShown:" +
+                currentUser.username;
+
+            if (
+                localStorage.getItem(key)
+            ) {
                 return;
             }
+
+            localStorage.setItem(
+                key,
+                "true"
+            );
+        }
+
+
+        async function loadNotifications() {
+
+            if (!currentUser) return;
 
             try {
 
@@ -2242,18 +1712,14 @@
                     await response.json();
 
                 if (!response.ok) {
-
                     throw new Error(
                         data.error ||
                         "Failed to load notifications"
                     );
-
                 }
 
                 sharedNotifications =
-                    Array.isArray(
-                        data.notifications
-                    )
+                    Array.isArray(data.notifications)
                         ? data.notifications
                         : [];
 
@@ -2269,7 +1735,6 @@
                 );
 
             }
-
         }
 
 
@@ -2281,23 +1746,17 @@
                     currentUser.username
                 ) || "[]"
             );
-
         }
 
 
         function isRead(id) {
 
             return getReadNotifications()
-                .includes(
-                    String(id)
-                );
-
+                .includes(String(id));
         }
 
 
-        function markNotificationRead(
-            id
-        ) {
+        function markNotificationRead(id) {
 
             const read =
                 getReadNotifications();
@@ -2305,16 +1764,8 @@
             const stringId =
                 String(id);
 
-            if (
-                !read.includes(
-                    stringId
-                )
-            ) {
-
-                read.push(
-                    stringId
-                );
-
+            if (!read.includes(stringId)) {
+                read.push(stringId);
             }
 
             localStorage.setItem(
@@ -2326,7 +1777,6 @@
             renderNotifications();
 
             updateUnreadCount();
-
         }
 
 
@@ -2338,9 +1788,7 @@
             const unread =
                 notifications.filter(
                     notification =>
-                        !isRead(
-                            notification.id
-                        )
+                        !isRead(notification.id)
                 ).length;
 
             const badge =
@@ -2355,16 +1803,13 @@
                         ? "99+"
                         : unread;
 
-                badge.style.display =
-                    "flex";
+                badge.style.display = "flex";
 
             } else {
 
-                badge.style.display =
-                    "none";
+                badge.style.display = "none";
 
             }
-
         }
 
 
@@ -2378,88 +1823,63 @@
                 Date.now();
 
             const lifetime =
-                24 *
-                60 *
-                60 *
-                1000;
+                24 * 60 * 60 * 1000;
 
             return sharedNotifications
-                .filter(
-                    notification => {
+                .filter(notification => {
 
-                        if (
-                            !notification.createdAt
-                        ) {
-                            return false;
-                        }
-
-                        const age =
-                            now -
-                            new Date(
-                                notification.createdAt
-                            ).getTime();
-
-                        if (
-                            age > lifetime
-                        ) {
-                            return false;
-                        }
-
-                        /*
-                         * Landon sees notifications
-                         * sent to Landon.
-                         */
-
-                        if (
-                            currentUser.username ===
-                            "landon"
-                        ) {
-
-                            return (
-                                notification.recipient ===
-                                "landon"
-                            );
-
-                        }
-
-                        /*
-                         * Mama sees her reminders
-                         * and Landon's food messages.
-                         */
-
-                        if (
-                            currentUser.username ===
-                            "mama"
-                        ) {
-
-                            return (
-                                notification.recipient ===
-                                    "mama" ||
-                                notification.recipient ===
-                                    "landon"
-                            );
-
-                        }
-
-                        /*
-                         * System does not need
-                         * normal notifications.
-                         */
-
-                        if (
-                            currentUser.username ===
-                            "system"
-                        ) {
-
-                            return false;
-
-                        }
-
+                    if (!notification.createdAt) {
                         return false;
+                    }
+
+                    const age =
+                        now -
+                        new Date(
+                            notification.createdAt
+                        ).getTime();
+
+                    if (age > lifetime) {
+                        return false;
+                    }
+
+                    if (
+                        currentUser.username ===
+                        "landon"
+                    ) {
+
+                        return (
+                            notification.recipient ===
+                            "landon"
+                        );
 
                     }
-                );
 
+                    if (
+                        currentUser.username ===
+                        "mama"
+                    ) {
+
+                        return (
+                            notification.recipient ===
+                                "mama" ||
+                            notification.recipient ===
+                                "landon"
+                        );
+
+                    }
+
+                    if (
+                        currentUser.username ===
+                        "system"
+                    ) {
+
+                        return true;
+
+                    }
+
+                    return false;
+
+                });
         }
 
 
@@ -2470,56 +1890,42 @@
                     "notifications"
                 );
 
-            if (!container) {
-                return;
-            }
+            if (!container) return;
 
             const notifications =
                 getVisibleNotifications();
 
-            if (
-                notifications.length ===
-                0
-            ) {
+            if (notifications.length === 0) {
 
                 const language =
                     getLanguage();
 
                 container.innerHTML = `
                     <div class="emptyState">
-                        ${
-                            translations[
-                                language
-                            ].empty
-                        }
+                        ${translations[language].empty}
                     </div>
                 `;
 
                 return;
-
             }
 
             container.innerHTML =
                 notifications
                     .sort(
                         (a, b) =>
-                            new Date(
-                                b.createdAt
-                            ) -
-                            new Date(
-                                a.createdAt
-                            )
+                            new Date(b.createdAt) -
+                            new Date(a.createdAt)
                     )
-                    .map(
-                        notification =>
-                            renderNotification(
-                                notification
-                            )
-                    )
+                    .map(notification => {
+
+                        return renderNotification(
+                            notification
+                        );
+
+                    })
                     .join("");
 
             updateUnreadCount();
-
         }
 
 
@@ -2533,41 +1939,34 @@
                 );
 
             const read =
-                isRead(
-                    notification.id
-                );
+                isRead(notification.id);
 
             const language =
                 getLanguage();
 
             const t =
-                translations[
-                    language
-                ] ||
+                translations[language] ||
                 translations.en;
 
             let title =
                 notification.title;
 
             let message =
-                notification.body ||
-                "";
+                notification.body || "";
 
             let sender =
                 "System";
 
 
-            /* =========================
-               MAMA VIEW
-            ========================= */
+            /*
+             * Mama sees food notifications
+             * as an outgoing message.
+             */
 
             if (
-                currentUser.username ===
-                    "mama" &&
-                notification.recipient ===
-                    "landon" &&
-                notification.type ===
-                    "food"
+                currentUser.username === "mama" &&
+                notification.recipient === "landon" &&
+                notification.type === "food"
             ) {
 
                 title =
@@ -2578,12 +1977,9 @@
                     notification.mamaBody ||
                     "";
 
-                sender =
-                    "Mama";
+                sender = "Mama";
 
-                if (
-                    notification.answer
-                ) {
+                if (notification.answer) {
 
                     if (
                         notification.answer ===
@@ -2603,72 +1999,55 @@
 
                         message +=
                             "<br><br><strong>" +
-                            "Landon did not eat yet." +
+                            "Landon did not eat yet" +
                             "</strong>";
 
                     }
 
                 }
 
-            }
-
-            /* =========================
-               LANDON VIEW
-            ========================= */
-
-            else if (
-                currentUser.username ===
-                "landon"
+            } else if (
+                currentUser.username === "landon"
             ) {
 
-                sender =
-                    "Mama";
+                sender = "Mama";
 
-            }
-
-            /* =========================
-               MAMA SYSTEM REMINDER
-            ========================= */
-
-            else if (
-                notification.recipient ===
-                "mama"
+            } else if (
+                notification.recipient === "mama"
             ) {
 
-                sender =
-                    "System";
+                sender = "System";
+
+            } else if (
+                currentUser.username === "system"
+            ) {
+
+                sender = "System";
 
             }
 
 
-            let actions =
-                "";
+            let actions = "";
 
 
-            /* =========================
-               LANDON ANSWER BUTTONS
-            ========================= */
+            /*
+             * Landon gets Yes / No
+             * on food notifications.
+             */
 
             if (
-                currentUser.username ===
-                    "landon" &&
-                notification.type ===
-                    "food" &&
+                currentUser.username === "landon" &&
+                notification.type === "food" &&
                 !notification.answer
             ) {
 
                 actions = `
-
-                    <div
-                        class="notificationActions"
-                    >
+                    <div class="notificationActions">
 
                         <button
                             class="answerButton"
                             onclick="answerFood(
-                                '${escapeJS(
-                                    notification.id
-                                )}',
+                                '${escapeJS(notification.id)}',
                                 'Yes'
                             )"
                         >
@@ -2678,9 +2057,7 @@
                         <button
                             class="answerButton"
                             onclick="answerFood(
-                                '${escapeJS(
-                                    notification.id
-                                )}',
+                                '${escapeJS(notification.id)}',
                                 'No'
                             )"
                         >
@@ -2689,19 +2066,13 @@
 
                     </div>
 
-
                     <div
                         class="foodAnswerArea"
-                        id="foodArea-${escapeHTML(
-                            notification.id
-                        )}"
+                        id="foodArea-${escapeHTML(notification.id)}"
                     >
-
                         <input
                             type="text"
-                            id="foodInput-${escapeHTML(
-                                notification.id
-                            )}"
+                            id="foodInput-${escapeHTML(notification.id)}"
                             placeholder="${t.whatDidYouEat}"
                             maxlength="200"
                         >
@@ -2709,34 +2080,29 @@
                         <button
                             class="submitFoodButton"
                             onclick="submitFood(
-                                '${escapeJS(
-                                    notification.id
-                                )}'
+                                '${escapeJS(notification.id)}'
                             )"
                         >
                             ${t.submit}
                         </button>
-
                     </div>
-
                 `;
 
             }
 
 
-            /* =========================
-               LANDON ANSWER RESULT
-            ========================= */
+            /*
+             * Landon sees his own answer
+             * after answering.
+             */
 
             if (
-                currentUser.username ===
-                    "landon" &&
+                currentUser.username === "landon" &&
                 notification.answer
             ) {
 
                 if (
-                    notification.answer ===
-                    "Yes"
+                    notification.answer === "Yes"
                 ) {
 
                     message +=
@@ -2752,7 +2118,7 @@
 
                     message +=
                         "<br><br><strong>" +
-                        "You did not eat yet." +
+                        "You did not eat yet" +
                         "</strong>";
 
                 }
@@ -2761,86 +2127,57 @@
 
 
             return `
+                <div class="notification ${
+                    read ? "" : "unread"
+                }">
 
-                <div
-                    class="notification ${
-                        read
-                            ? ""
-                            : "unread"
-                    }"
-                >
-
-                    <div
-                        class="notificationTop"
-                    >
+                    <div class="notificationTop">
 
                         <div>
 
-                            <div
-                                class="notificationTitle"
-                            >
-                                ${escapeHTML(
-                                    title
-                                )}
+                            <div class="notificationTitle">
+                                ${escapeHTML(title)}
                             </div>
 
-                            <div
-                                class="notificationSender"
-                            >
-                                ${escapeHTML(
-                                    sender
-                                )}
+                            <div class="notificationSender">
+                                ${escapeHTML(sender)}
                             </div>
 
                         </div>
 
                     </div>
 
-
-                    <div
-                        class="notificationMessage"
-                    >
+                    <div class="notificationMessage">
                         ${message}
                     </div>
 
-
-                    <div
-                        class="notificationTime"
-                    >
+                    <div class="notificationTime">
                         ${date.toLocaleString()}
                     </div>
 
-
                     ${actions}
-
 
                     ${
                         !read
-                            ? `
-                                <div
-                                    class="notificationActions"
+                        ? `
+                            <div class="notificationActions">
+
+                                <button
+                                    class="readButton"
+                                    onclick="markNotificationRead(
+                                        '${escapeJS(notification.id)}'
+                                    )"
                                 >
+                                    Mark as read
+                                </button>
 
-                                    <button
-                                        class="readButton"
-                                        onclick="markNotificationRead(
-                                            '${escapeJS(
-                                                notification.id
-                                            )}'
-                                        )"
-                                    >
-                                        Mark as read
-                                    </button>
-
-                                </div>
-                            `
-                            : ""
+                            </div>
+                        `
+                        : ""
                     }
 
                 </div>
-
             `;
-
         }
 
 
@@ -2853,9 +2190,7 @@
             answer
         ) {
 
-            if (
-                answer === "Yes"
-            ) {
+            if (answer === "Yes") {
 
                 const area =
                     document.getElementById(
@@ -2864,10 +2199,8 @@
                     );
 
                 if (area) {
-
                     area.style.display =
                         "block";
-
                 }
 
                 const input =
@@ -2877,22 +2210,17 @@
                     );
 
                 if (input) {
-
                     input.focus();
-
                 }
 
                 return;
-
             }
-
 
             await saveAnswer(
                 notificationId,
                 "No",
                 null
             );
-
         }
 
 
@@ -2906,9 +2234,7 @@
                     notificationId
                 );
 
-            if (!input) {
-                return;
-            }
+            if (!input) return;
 
             const food =
                 input.value.trim();
@@ -2918,7 +2244,6 @@
                 input.focus();
 
                 return;
-
             }
 
             await saveAnswer(
@@ -2926,7 +2251,6 @@
                 "Yes",
                 food
             );
-
         }
 
 
@@ -2942,7 +2266,6 @@
                     await fetch(
                         "/api/answer",
                         {
-
                             method: "POST",
 
                             headers: {
@@ -2962,7 +2285,6 @@
                                 food
 
                             })
-
                         }
                     );
 
@@ -2990,9 +2312,7 @@
                 alert(
                     "Could not save your answer. Please try again."
                 );
-
             }
-
         }
 
 
@@ -3006,9 +2326,7 @@
 
             document.getElementById(
                 "inboxModal"
-            ).style.display =
-                "flex";
-
+            ).style.display = "flex";
         }
 
 
@@ -3016,8 +2334,92 @@
 
             document.getElementById(
                 "inboxModal"
-            ).style.display =
-                "none";
+            ).style.display = "none";
+        }
+
+
+        /* =========================
+           SYSTEM TESTER
+        ========================= */
+
+        function openSystemTester() {
+
+            document.getElementById(
+                "systemModal"
+            ).style.display = "flex";
+
+            document.getElementById(
+                "systemTestStatus"
+            ).textContent = "";
+
+        }
+
+
+        function closeSystemTester() {
+
+            document.getElementById(
+                "systemModal"
+            ).style.display = "none";
+
+        }
+
+
+        async function runSystemTest(type) {
+
+            const status =
+                document.getElementById(
+                    "systemTestStatus"
+                );
+
+            const names = {
+                breakfast: "Breakfast",
+                lunch: "Lunch",
+                dinner: "Dinner"
+            };
+
+            status.textContent =
+                "Sending " +
+                names[type] +
+                " test...";
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/notifications?test=" +
+                        encodeURIComponent(type)
+                    );
+
+                const data =
+                    await response.json();
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error ||
+                        "Test failed"
+                    );
+
+                }
+
+                status.textContent =
+                    names[type] +
+                    " test sent to Landon.";
+
+                await loadNotifications();
+
+            } catch (error) {
+
+                console.error(
+                    "System test error:",
+                    error
+                );
+
+                status.textContent =
+                    "Test failed: " +
+                    error.message;
+
+            }
 
         }
 
@@ -3030,15 +2432,13 @@
 
             document.getElementById(
                 "aiModal"
-            ).style.display =
-                "flex";
+            ).style.display = "flex";
 
             document.getElementById(
                 "chatInput"
             ).focus();
 
             renderChat();
-
         }
 
 
@@ -3046,9 +2446,7 @@
 
             document.getElementById(
                 "aiModal"
-            ).style.display =
-                "none";
-
+            ).style.display = "none";
         }
 
 
@@ -3059,96 +2457,74 @@
                     "chatMessages"
                 );
 
-            if (
-                chatMessages.length ===
-                0
-            ) {
+            if (chatMessages.length === 0) {
 
                 container.innerHTML = `
-
-                    <div
-                        class="chatMessage assistant"
-                    >
+                    <div class="chatMessage assistant">
 
                         <div>
 
-                            <div
-                                class="chatName"
-                            >
+                            <div class="chatName">
                                 AI Assistant
                             </div>
 
-                            <div
-                                class="chatBubble"
-                            >
+                            <div class="chatBubble">
                                 Hi! I'm your AI Assistant. Ask me anything.
                             </div>
 
                         </div>
 
                     </div>
-
                 `;
 
                 return;
-
             }
-
 
             container.innerHTML =
                 chatMessages
-                    .map(
-                        message => {
+                    .map(message => {
 
-                            const isUser =
-                                message.role ===
-                                "user";
+                        const isUser =
+                            message.role ===
+                            "user";
 
-                            return `
+                        return `
+                            <div
+                                class="chatMessage ${
+                                    isUser
+                                        ? "user"
+                                        : "assistant"
+                                }"
+                            >
 
-                                <div
-                                    class="chatMessage ${
-                                        isUser
-                                            ? "user"
-                                            : "assistant"
-                                    }"
-                                >
+                                <div>
 
-                                    <div>
+                                    ${
+                                        !isUser
+                                        ? `
+                                            <div class="chatName">
+                                                AI Assistant
+                                            </div>
+                                        `
+                                        : ""
+                                    }
 
-                                        ${
-                                            !isUser
-                                                ? `
-                                                    <div
-                                                        class="chatName"
-                                                    >
-                                                        AI Assistant
-                                                    </div>
-                                                `
-                                                : ""
-                                        }
-
-                                        <div
-                                            class="chatBubble"
-                                        >
-                                            ${escapeHTML(
-                                                message.content
-                                            )}
-                                        </div>
-
+                                    <div class="chatBubble">
+                                        ${escapeHTML(
+                                            message.content
+                                        )}
                                     </div>
 
                                 </div>
 
-                            `;
+                            </div>
+                        `;
 
-                        }
-                    )
+                    })
                     .join("");
 
             container.scrollTop =
                 container.scrollHeight;
-
         }
 
 
@@ -3172,31 +2548,21 @@
             const message =
                 input.value.trim();
 
-            if (!message) {
-                return;
-            }
+            if (!message) return;
 
             chatMessages.push({
-
-                role:
-                    "user",
-
-                content:
-                    message
-
+                role: "user",
+                content: message
             });
 
-            input.value =
-                "";
+            input.value = "";
 
             renderChat();
 
-            sendButton.disabled =
-                true;
+            sendButton.disabled = true;
 
             typing.style.display =
                 "block";
-
 
             try {
 
@@ -3204,21 +2570,17 @@
                     await fetch(
                         "/api/chat",
                         {
-
-                            method:
-                                "POST",
+                            method: "POST",
 
                             headers: {
                                 "Content-Type":
                                     "application/json"
                             },
 
-                            body:
-                                JSON.stringify({
-                                    messages:
-                                        chatMessages
-                                })
-
+                            body: JSON.stringify({
+                                messages:
+                                    chatMessages
+                            })
                         }
                     );
 
@@ -3231,13 +2593,11 @@
                         data.error ||
                         "AI request failed."
                     );
-
                 }
 
                 chatMessages.push({
 
-                    role:
-                        "assistant",
+                    role: "assistant",
 
                     content:
                         data.reply ||
@@ -3247,14 +2607,11 @@
 
             } catch (error) {
 
-                console.error(
-                    error
-                );
+                console.error(error);
 
                 chatMessages.push({
 
-                    role:
-                        "assistant",
+                    role: "assistant",
 
                     content:
                         "Sorry, something went wrong while contacting the AI."
@@ -3272,9 +2629,7 @@
                 renderChat();
 
                 input.focus();
-
             }
-
         }
 
 
@@ -3289,15 +2644,13 @@
             function(event) {
 
                 if (
-                    event.key ===
-                        "Enter" &&
+                    event.key === "Enter" &&
                     !event.shiftKey
                 ) {
 
                     event.preventDefault();
 
                     sendMessage();
-
                 }
 
             }
@@ -3320,11 +2673,8 @@
 
                 document.getElementById(
                     modalId
-                ).style.display =
-                    "none";
-
+                ).style.display = "none";
             }
-
         }
 
 
@@ -3335,49 +2685,40 @@
         function escapeHTML(text) {
 
             return String(text)
-
                 .replace(
                     /&/g,
                     "&amp;"
                 )
-
                 .replace(
                     /</g,
                     "&lt;"
                 )
-
                 .replace(
                     />/g,
                     "&gt;"
                 )
-
                 .replace(
                     /"/g,
                     "&quot;"
                 )
-
                 .replace(
                     /'/g,
                     "&#039;"
                 );
-
         }
 
 
         function escapeJS(text) {
 
             return String(text)
-
                 .replace(
                     /\\/g,
                     "\\\\"
                 )
-
                 .replace(
                     /'/g,
                     "\\'"
                 );
-
         }
 
 
@@ -3385,18 +2726,13 @@
            AUTOMATIC SYNC
         ========================= */
 
-        setInterval(
-            () => {
+        setInterval(() => {
 
-                if (!currentUser) {
-                    return;
-                }
+            if (!currentUser) return;
 
-                loadNotifications();
+            loadNotifications();
 
-            },
-            15000
-        );
+        }, 15000);
 
 
         /* =========================
@@ -3405,53 +2741,45 @@
 
         function startApplication() {
 
-            runLoadingScreen(
-                () => {
+            runLoadingScreen(() => {
 
-                    const savedUser =
-                        localStorage.getItem(
-                            "loggedInUser"
-                        );
+                const savedUser =
+                    localStorage.getItem(
+                        "loggedInUser"
+                    );
 
-                    if (
-                        savedUser &&
-                        accounts[
-                            savedUser
-                        ]
-                    ) {
+                if (
+                    savedUser &&
+                    accounts[savedUser]
+                ) {
 
-                        currentUser = {
+                    currentUser = {
 
-                            username:
-                                savedUser,
+                        username:
+                            savedUser,
 
-                            displayName:
-                                accounts[
-                                    savedUser
-                                ].displayName
+                        displayName:
+                            accounts[
+                                savedUser
+                            ].displayName
 
-                        };
+                    };
 
-                        runLoadingScreen(
-                            () => {
+                    runLoadingScreen(() => {
 
-                                showDashboard();
+                        showDashboard();
 
-                            }
-                        );
+                    });
 
-                    } else {
+                } else {
 
-                        document.getElementById(
-                            "loginPage"
-                        ).style.display =
-                            "flex";
-
-                    }
-
+                    document.getElementById(
+                        "loginPage"
+                    ).style.display =
+                        "flex";
                 }
-            );
 
+            });
         }
 
 
@@ -3461,4 +2789,3 @@
 
 </body>
 </html>
-```
