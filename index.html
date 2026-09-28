@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -1550,8 +1549,6 @@
                 <div class="dashboardButtons">
 
 
-                    <!-- INBOX -->
-
                     <div style="position: relative;">
 
                         <button
@@ -1589,8 +1586,6 @@
 
                     </div>
 
-
-                    <!-- SECOND BUTTON -->
 
                     <button
                         class="dashboardButton"
@@ -1851,6 +1846,22 @@
 
         async function setupPushNotifications() {
 
+            /*
+             * System is only a tester account.
+             * It does not need browser push.
+             */
+
+            if (
+                !currentUser ||
+                currentUser.username ===
+                "system"
+            ) {
+
+                return;
+
+            }
+
+
             if (
                 !("serviceWorker" in navigator) ||
                 !("PushManager" in window) ||
@@ -1898,6 +1909,7 @@
                     );
 
                     return;
+
                 }
 
 
@@ -1960,7 +1972,9 @@
                     currentUser.username
                 );
 
-            } catch (error) {
+            }
+
+            catch (error) {
 
                 console.error(
                     "Push setup error:",
@@ -2035,7 +2049,7 @@
                     "What did you eat?",
 
                 submit:
-                    "Submit",
+                    "Done",
 
                 saving:
                     "Saving...",
@@ -2103,7 +2117,7 @@
                     "Apa yang kamu makan?",
 
                 submit:
-                    "Kirim",
+                    "Selesai",
 
                 saving:
                     "Menyimpan...",
@@ -2171,7 +2185,7 @@
                     "¿Qué comiste?",
 
                 submit:
-                    "Enviar",
+                    "Listo",
 
                 saving:
                     "Guardando...",
@@ -2185,7 +2199,7 @@
             fr: {
 
                 dashboard:
-                    "Que souhaitez-vous faire ?",
+                    "Que souhaitez-vous faire ?", 
 
                 inbox:
                     "Boîte de réception",
@@ -2239,7 +2253,7 @@
                     "Qu'avez-vous mangé ?",
 
                 submit:
-                    "Envoyer",
+                    "Terminé",
 
                 saving:
                     "Enregistrement...",
@@ -2307,7 +2321,7 @@
                     "Was hast du gegessen?",
 
                 submit:
-                    "Senden",
+                    "Fertig",
 
                 saving:
                     "Speichern...",
@@ -2375,7 +2389,7 @@
                     "你吃了什么？",
 
                 submit:
-                    "提交",
+                    "完成",
 
                 saving:
                     "保存中...",
@@ -2443,7 +2457,7 @@
                     "何を食べましたか？",
 
                 submit:
-                    "送信",
+                    "完了",
 
                 saving:
                     "保存中...",
@@ -2511,7 +2525,7 @@
                     "무엇을 먹었나요?",
 
                 submit:
-                    "제출",
+                    "완료",
 
                 saving:
                     "저장 중...",
@@ -3376,17 +3390,17 @@
                             "mama"
                         ) {
 
+                            /*
+                             * Mama only sees notifications
+                             * assigned to Mama.
+                             *
+                             * She does NOT see Landon's
+                             * notification.
+                             */
+
                             return (
                                 notification.recipient ===
-                                    "mama" ||
-
-                                (
-                                    notification.recipient ===
-                                        "landon" &&
-
-                                    notification.type ===
-                                        "food"
-                                )
+                                "mama"
                             );
 
                         }
@@ -3442,15 +3456,18 @@
                     getLanguage();
 
 
+                const t =
+                    translations[
+                        language
+                    ] ||
+                    translations.en;
+
+
                 container.innerHTML = `
 
                     <div class="emptyState">
 
-                        ${
-                            translations[
-                                language
-                            ].empty
-                        }
+                        ${escapeHTML(t.empty)}
 
                     </div>
 
@@ -3517,7 +3534,8 @@
 
 
             let title =
-                notification.title;
+                notification.title ||
+                "";
 
 
             let message =
@@ -3529,13 +3547,129 @@
                 "System";
 
 
-            /* =========================
-               MAMA FOOD NOTIFICATION
-            ========================= */
+            let actions =
+                "";
+
+
+            /* =================================================
+               MAMA'S ORIGINAL FOOD NOTIFICATION
+               Mama answers this FIRST.
+            ================================================= */
 
             if (
                 currentUser.username ===
                     "mama" &&
+
+                notification.recipient ===
+                    "mama" &&
+
+                notification.type ===
+                    "food"
+            ) {
+
+                sender =
+                    "System";
+
+
+                title =
+                    notification.title ||
+                    "Did Landon Eat Yet?";
+
+
+                message =
+                    notification.body ||
+                    "";
+
+
+                /*
+                 * Mama has not answered yet.
+                 * Show Yes / No.
+                 */
+
+                if (
+                    !notification.answer
+                ) {
+
+                    actions = `
+
+                        <div
+                            class="notificationActions"
+                        >
+
+                            <button
+                                class="answerButton"
+                                onclick="answerMamaFood(
+                                    '${escapeJS(
+                                        notification.id
+                                    )}',
+                                    'Yes'
+                                )"
+                            >
+                                ${escapeHTML(t.yes)}
+                            </button>
+
+
+                            <button
+                                class="answerButton"
+                                onclick="answerMamaFood(
+                                    '${escapeJS(
+                                        notification.id
+                                    )}',
+                                    'No'
+                                )"
+                            >
+                                ${escapeHTML(t.no)}
+                            </button>
+
+                        </div>
+
+                    `;
+
+                }
+
+
+                /*
+                 * Mama already answered.
+                 * Show her answer in the original
+                 * notification.
+                 */
+
+                else {
+
+                    if (
+                        notification.answer ===
+                        "Yes"
+                    ) {
+
+                        message +=
+                            "<br><br><strong>" +
+                            "Mama answered Yes." +
+                            "</strong>";
+
+                    }
+
+                    else {
+
+                        message +=
+                            "<br><br><strong>" +
+                            "Mama answered No." +
+                            "</strong>";
+
+                    }
+
+                }
+
+            }
+
+
+            /* =================================================
+               LANDON'S FOOD NOTIFICATION
+               This is created ONLY after Mama says Yes.
+            ================================================= */
+
+            else if (
+                currentUser.username ===
+                    "landon" &&
 
                 notification.recipient ===
                     "landon" &&
@@ -3544,47 +3678,109 @@
                     "food"
             ) {
 
-                title =
-                    notification.mamaTitle ||
-                    "Send Notification to Landon";
-
-
-                message =
-                    notification.mamaBody ||
-                    "";
-
-
                 sender =
                     "Mama";
 
 
-                /* =========================
-                   LANDON ANSWERED YES
-                ========================= */
+                /*
+                 * Landon has not answered yet.
+                 * Show Yes / No.
+                 */
 
                 if (
+                    !notification.answer
+                ) {
+
+                    actions = `
+
+                        <div
+                            class="notificationActions"
+                        >
+
+                            <button
+                                class="answerButton"
+                                onclick="answerLandonFood(
+                                    '${escapeJS(
+                                        notification.id
+                                    )}',
+                                    'Yes'
+                                )"
+                            >
+                                ${escapeHTML(t.yes)}
+                            </button>
+
+
+                            <button
+                                class="answerButton"
+                                onclick="answerLandonFood(
+                                    '${escapeJS(
+                                        notification.id
+                                    )}',
+                                    'No'
+                                )"
+                            >
+                                ${escapeHTML(t.no)}
+                            </button>
+
+                        </div>
+
+
+                        <div
+                            class="foodAnswerArea"
+                            id="foodArea-${escapeHTML(
+                                notification.id
+                            )}"
+                        >
+
+                            <input
+                                type="text"
+                                id="foodInput-${escapeHTML(
+                                    notification.id
+                                )}"
+                                placeholder="${escapeHTML(
+                                    t.whatDidYouEat
+                                )}"
+                                maxlength="200"
+                            >
+
+
+                            <button
+                                class="submitFoodButton"
+                                onclick="submitLandonFood(
+                                    '${escapeJS(
+                                        notification.id
+                                    )}'
+                                )"
+                            >
+                                ${escapeHTML(t.submit)}
+                            </button>
+
+                        </div>
+
+                    `;
+
+                }
+
+
+                /*
+                 * Landon has already answered.
+                 */
+
+                else if (
                     notification.answer ===
                     "Yes"
                 ) {
 
                     message +=
                         "<br><br><strong>" +
-
-                        "Landon ate: " +
-
+                        "You ate: " +
                         escapeHTML(
                             notification.food ||
-                            "Food"
+                            ""
                         ) +
-
                         "</strong>";
 
                 }
-
-
-                /* =========================
-                   LANDON ANSWERED NO
-                ========================= */
 
                 else if (
                     notification.answer ===
@@ -3593,9 +3789,7 @@
 
                     message +=
                         "<br><br><strong>" +
-
-                        "Landon did not eat yet" +
-
+                        "You did not eat yet." +
                         "</strong>";
 
                 }
@@ -3603,13 +3797,21 @@
             }
 
 
-            /* =========================
-               LANDON
-            ========================= */
+            /* =================================================
+               LANDON FOOD RESULT FROM MAMA
+               This supports older result notifications
+               created by the previous backend.
+            ================================================= */
 
             else if (
                 currentUser.username ===
-                "landon"
+                    "landon" &&
+
+                notification.recipient ===
+                    "landon" &&
+
+                notification.type ===
+                    "foodResult"
             ) {
 
                 sender =
@@ -3618,24 +3820,9 @@
             }
 
 
-            /* =========================
-               MAMA REMINDER
-            ========================= */
-
-            else if (
-                notification.recipient ===
-                "mama"
-            ) {
-
-                sender =
-                    "System";
-
-            }
-
-
-            /* =========================
+            /* =================================================
                SYSTEM
-            ========================= */
+            ================================================= */
 
             else if (
                 currentUser.username ===
@@ -3648,133 +3835,17 @@
             }
 
 
-            let actions =
-                "";
+            /* =================================================
+               NORMAL MAMA NOTIFICATION
+            ================================================= */
 
-
-            /* =========================
-               LANDON YES / NO
-            ========================= */
-
-            if (
-                currentUser.username ===
-                    "landon" &&
-
-                notification.type ===
-                    "food" &&
-
-                !notification.answer
+            else if (
+                notification.recipient ===
+                "mama"
             ) {
 
-                actions = `
-
-                    <div
-                        class="notificationActions"
-                    >
-
-                        <button
-                            class="answerButton"
-                            onclick="answerFood(
-                                '${escapeJS(
-                                    notification.id
-                                )}',
-                                'Yes'
-                            )"
-                        >
-                            ${t.yes}
-                        </button>
-
-
-                        <button
-                            class="answerButton"
-                            onclick="answerFood(
-                                '${escapeJS(
-                                    notification.id
-                                )}',
-                                'No'
-                            )"
-                        >
-                            ${t.no}
-                        </button>
-
-                    </div>
-
-
-                    <div
-                        class="foodAnswerArea"
-                        id="foodArea-${escapeHTML(
-                            notification.id
-                        )}"
-                    >
-
-                        <input
-                            type="text"
-                            id="foodInput-${escapeHTML(
-                                notification.id
-                            )}"
-                            placeholder="${t.whatDidYouEat}"
-                            maxlength="200"
-                        >
-
-
-                        <button
-                            class="submitFoodButton"
-                            onclick="submitFood(
-                                '${escapeJS(
-                                    notification.id
-                                )}'
-                            )"
-                        >
-                            ${t.submit}
-                        </button>
-
-                    </div>
-
-                `;
-
-            }
-
-
-            /* =========================
-               LANDON'S ANSWER
-            ========================= */
-
-            if (
-                currentUser.username ===
-                    "landon" &&
-
-                notification.answer
-            ) {
-
-                if (
-                    notification.answer ===
-                    "Yes"
-                ) {
-
-                    message +=
-                        "<br><br><strong>" +
-
-                        "You ate: " +
-
-                        escapeHTML(
-                            notification.food ||
-                            ""
-                        ) +
-
-                        "</strong>";
-
-                }
-
-                else {
-
-                    message +=
-                        "<br><br><strong>" +
-
-                        "You did not eat yet" +
-
-                        "</strong>";
-
-                }
+                sender =
+                    "System";
 
             }
 
@@ -3819,7 +3890,7 @@
                     <div
                         class="notificationMessage"
                     >
-                        ${message}
+                        ${escapeHTML(message)}
                     </div>
 
 
@@ -3865,14 +3936,121 @@
         }
 
 
-        /* =========================
-           FOOD ANSWER
-        ========================= */
+        /* =================================================
+           MAMA ANSWERS THE ORIGINAL QUESTION
+        ================================================= */
 
-        async function answerFood(
+        async function answerMamaFood(
             notificationId,
             answer
         ) {
+
+            if (
+                !currentUser ||
+                currentUser.username !==
+                "mama"
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+             * Mama = No
+             * Nothing else happens.
+             */
+
+            if (
+                answer ===
+                "No"
+            ) {
+
+                await saveAnswer(
+                    notificationId,
+                    "No",
+                    null,
+                    "mama"
+                );
+
+
+                return;
+
+            }
+
+
+            /*
+             * Mama = Yes
+             * Backend creates a NEW notification
+             * for Landon.
+             *
+             * Mama does NOT enter the food.
+             */
+
+            if (
+                answer ===
+                "Yes"
+            ) {
+
+                await saveAnswer(
+                    notificationId,
+                    "Yes",
+                    null,
+                    "mama"
+                );
+
+            }
+
+        }
+
+
+        /* =================================================
+           LANDON ANSWERS HIS NEW FOOD QUESTION
+        ================================================= */
+
+        async function answerLandonFood(
+            notificationId,
+            answer
+        ) {
+
+            if (
+                !currentUser ||
+                currentUser.username !==
+                "landon"
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+             * Landon = No
+             * Done.
+             */
+
+            if (
+                answer ===
+                "No"
+            ) {
+
+                await saveAnswer(
+                    notificationId,
+                    "No",
+                    null,
+                    "landon"
+                );
+
+
+                return;
+
+            }
+
+
+            /*
+             * Landon = Yes
+             * Show the food box.
+             */
 
             if (
                 answer ===
@@ -3907,24 +4085,29 @@
 
                 }
 
+            }
+
+        }
+
+
+        /* =================================================
+           LANDON SUBMITS WHAT HE ATE
+        ================================================= */
+
+        async function submitLandonFood(
+            notificationId
+        ) {
+
+            if (
+                !currentUser ||
+                currentUser.username !==
+                "landon"
+            ) {
 
                 return;
 
             }
 
-
-            await saveAnswer(
-                notificationId,
-                "No",
-                null
-            );
-
-        }
-
-
-        async function submitFood(
-            notificationId
-        ) {
 
             const input =
                 document.getElementById(
@@ -3952,17 +4135,41 @@
             await saveAnswer(
                 notificationId,
                 "Yes",
-                food
+                food,
+                "landon"
             );
 
         }
 
 
+        /* =================================================
+           SAVE ANSWER
+        ================================================= */
+
         async function saveAnswer(
             notificationId,
             answer,
-            food
+            food,
+            answerUsername
         ) {
+
+            if (!currentUser) {
+
+                return;
+
+            }
+
+
+            /*
+             * The username is explicitly passed
+             * so Mama and Landon cannot accidentally
+             * answer each other's notification.
+             */
+
+            const username =
+                answerUsername ||
+                currentUser.username;
+
 
             try {
 
@@ -3984,8 +4191,7 @@
                             body:
                                 JSON.stringify({
 
-                                    username:
-                                        currentUser.username,
+                                    username,
 
                                     notificationId,
 
@@ -4106,7 +4312,9 @@
                     <div
                         class="notificationTitle"
                     >
-                        ${t.systemTitle}
+                        ${escapeHTML(
+                            t.systemTitle
+                        )}
                     </div>
 
 
@@ -4216,6 +4424,15 @@
 
 
                 await loadNotifications();
+
+
+                /*
+                 * Re-open System Tester because
+                 * loadNotifications() renders the
+                 * normal inbox.
+                 */
+
+                openSystemTester();
 
             }
 
@@ -4712,4 +4929,3 @@
 </body>
 
 </html>
-```
