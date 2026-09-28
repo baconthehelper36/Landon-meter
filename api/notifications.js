@@ -251,30 +251,16 @@ function createFoodNotification(
     type
 ) {
 
-    const titles = {
-
-        breakfast:
-            "Did you eat breakfast yet?",
-
-        lunch:
-            "Did you eat lunch yet?",
-
-        dinner:
-            "Did you eat dinner yet?"
-
-    };
-
-
     const mamaTitles = {
 
         breakfast:
-            "Send Notification to Landon",
+            "Send Notification",
 
         lunch:
-            "Send Notification to Landon",
+            "Send Notification",
 
         dinner:
-            "Send Notification to Landon"
+            "Send Notification"
 
     };
 
@@ -306,25 +292,34 @@ function createFoodNotification(
         type:
             "food",
 
+        meal:
+            type,
+
+        /*
+         * IMPORTANT:
+         * The first notification belongs
+         * ONLY to Mama.
+         */
+
         recipient:
-            "landon",
+            "mama",
 
         title:
-            titles[type],
-
-        body:
-            titles[type],
-
-        mamaTitle:
             mamaTitles[type],
 
-        mamaBody:
+        body:
             mamaBodies[type],
 
         answer:
             null,
 
         food:
+            null,
+
+        answeredBy:
+            null,
+
+        answeredAt:
             null,
 
         createdAt:
@@ -370,7 +365,7 @@ async function createNotification(
 
 /* =========================
    SEND FOOD NOTIFICATION
-   TO BOTH MAMA + LANDON
+   TO MAMA FIRST
 ========================= */
 
 async function sendFoodNotification(
@@ -384,7 +379,7 @@ async function sendFoodNotification(
 
 
     /*
-     * Save ONE shared notification.
+     * Save the notification.
      */
 
     await createNotification(
@@ -393,31 +388,13 @@ async function sendFoodNotification(
 
 
     /*
-     * LANDON PUSH
-     */
-
-    await sendPush(
-        "landon",
-
-        {
-            id:
-                notification.id,
-
-            title:
-                notification.title,
-
-            body:
-                notification.body
-        }
-    );
-
-
-    /*
-     * MAMA PUSH
+     * IMPORTANT:
      *
-     * Mama receives a different
-     * title/body, but it uses
-     * the same notification ID.
+     * ONLY MAMA receives this
+     * first notification.
+     *
+     * Landon receives NOTHING
+     * until Mama chooses YES.
      */
 
     await sendPush(
@@ -428,10 +405,10 @@ async function sendFoodNotification(
                 notification.id,
 
             title:
-                notification.mamaTitle,
+                notification.title,
 
             body:
-                notification.mamaBody
+                notification.body
         }
     );
 
