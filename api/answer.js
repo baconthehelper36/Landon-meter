@@ -13,7 +13,8 @@ module.exports = async (req, res) => {
         const {
             username,
             notificationId,
-            answer
+            answer,
+            food
         } = req.body;
 
         if (!username || !notificationId || !answer) {
@@ -22,7 +23,6 @@ module.exports = async (req, res) => {
             });
         }
 
-        // Only Landon answers food notifications
         if (username !== "landon") {
             return res.status(403).json({
                 error: "Only Landon can answer these notifications"
@@ -32,6 +32,12 @@ module.exports = async (req, res) => {
         if (answer !== "Yes" && answer !== "No") {
             return res.status(400).json({
                 error: "Answer must be Yes or No"
+            });
+        }
+
+        if (answer === "Yes" && (!food || !String(food).trim())) {
+            return res.status(400).json({
+                error: "Please enter what you ate"
             });
         }
 
@@ -51,25 +57,44 @@ module.exports = async (req, res) => {
         notification.answeredAt = answeredAt;
         notification.answeredBy = "landon";
 
-        // Save updated notification
+        if (answer === "Yes") {
+            notification.food = String(food).trim();
+        } else {
+            notification.food = null;
+        }
+
         await redis.set(key, notification);
 
-        // Update notification history
         const history =
-            await redis.lrange("notifications", 0, 99);
+            await redis.lrange(
+                "notifications",
+                0,
+                99
+            );
 
         for (let i = 0; i < history.length; i++) {
 
-            const item =
-                typeof history[i] === "string"
-                    ? JSON.parse(history[i])
-                    : history[i];
+            let item = history[i];
+
+            if (typeof item === "string") {
+                try {
+                    item = JSON.parse(item);
+                } catch {
+                    continue;
+                }
+            }
 
             if (item.id === notificationId) {
 
                 item.answer = answer;
                 item.answeredAt = answeredAt;
                 item.answeredBy = "landon";
+
+                if (answer === "Yes") {
+                    item.food = String(food).trim();
+                } else {
+                    item.food = null;
+                }
 
                 await redis.lset(
                     "notifications",
@@ -85,6 +110,9 @@ module.exports = async (req, res) => {
             success: true,
             notificationId,
             answer,
+            food: answer === "Yes"
+                ? String(food).trim()
+                : null,
             answeredAt
         });
 
