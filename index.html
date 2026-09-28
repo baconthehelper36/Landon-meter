@@ -1,0 +1,1103 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Landon's Inbox</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #07090d;
+            color: white;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        button,
+        input {
+            font-family: inherit;
+        }
+
+        /* =========================
+           LOADING SCREEN
+        ========================== */
+
+        .loading-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background:
+                radial-gradient(circle at 50% 45%, #182033 0%, #090c13 45%, #040509 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .loader-ring {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.08);
+            border-top-color: #ffffff;
+            animation: spin 0.9s linear infinite;
+            margin-bottom: 28px;
+            box-shadow: 0 0 40px rgba(255,255,255,0.08);
+        }
+
+        .loading-text {
+            font-size: 14px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.6);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .loading-bar {
+            width: 220px;
+            height: 3px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 20px;
+            margin-top: 25px;
+            overflow: hidden;
+        }
+
+        .loading-progress {
+            width: 0%;
+            height: 100%;
+            background: white;
+            border-radius: 20px;
+            transition: width 0.1s linear;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse {
+            50% {
+                opacity: 0.35;
+            }
+        }
+
+        /* =========================
+           BACKGROUND
+        ========================== */
+
+        .background {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .orb {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.18;
+        }
+
+        .orb.one {
+            background: #3b82f6;
+            top: -120px;
+            left: -100px;
+            animation: floatOne 10s ease-in-out infinite;
+        }
+
+        .orb.two {
+            background: #8b5cf6;
+            right: -120px;
+            bottom: -120px;
+            animation: floatTwo 12s ease-in-out infinite;
+        }
+
+        @keyframes floatOne {
+            50% {
+                transform: translate(100px, 80px);
+            }
+        }
+
+        @keyframes floatTwo {
+            50% {
+                transform: translate(-100px, -80px);
+            }
+        }
+
+        /* =========================
+           LOGIN
+        ========================== */
+
+        .page {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 42px;
+            background: rgba(15, 18, 26, 0.78);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            box-shadow:
+                0 30px 100px rgba(0,0,0,0.5),
+                inset 0 1px rgba(255,255,255,0.05);
+            animation: cardAppear 0.8s cubic-bezier(.16,1,.3,1);
+        }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: translateY(25px) scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .logo {
+            width: 58px;
+            height: 58px;
+            border-radius: 17px;
+            background: linear-gradient(135deg, #ffffff, #777);
+            color: #050608;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 23px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 35px rgba(255,255,255,0.12);
+        }
+
+        .login-container h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.48);
+            margin-bottom: 32px;
+            font-size: 14px;
+        }
+
+        .input-group {
+            margin-bottom: 17px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            color: rgba(255,255,255,0.55);
+            margin-bottom: 8px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 15px;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            outline: none;
+            background: rgba(255,255,255,0.04);
+            color: white;
+            transition: 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.07);
+        }
+
+        .login-button {
+            width: 100%;
+            margin-top: 8px;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: white;
+            color: #07090d;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(255,255,255,0.12);
+        }
+
+        .login-button:active {
+            transform: scale(0.98);
+        }
+
+        .error {
+            min-height: 18px;
+            margin-top: 13px;
+            text-align: center;
+            font-size: 12px;
+            color: #ff6b6b;
+        }
+
+        /* =========================
+           DASHBOARD
+        ========================== */
+
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+            padding: 40px;
+            position: relative;
+        }
+
+        .dashboard.visible {
+            display: block;
+            animation: dashboardAppear 0.8s ease;
+        }
+
+        @keyframes dashboardAppear {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        .greeting {
+            font-size: clamp(28px, 5vw, 46px);
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        .account-name {
+            color: rgba(255,255,255,0.42);
+            margin-top: 7px;
+            font-size: 14px;
+        }
+
+        .logout {
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.7);
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .logout:hover {
+            background: rgba(255,255,255,0.08);
+            color: white;
+        }
+
+        .inbox-area {
+            min-height: calc(100vh - 150px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .inbox-button {
+            position: relative;
+            width: 230px;
+            height: 230px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.12);
+            background:
+                radial-gradient(circle at 35% 30%, rgba(255,255,255,0.12), rgba(255,255,255,0.025));
+            color: white;
+            cursor: pointer;
+            font-size: 22px;
+            font-weight: bold;
+            transition: 0.35s cubic-bezier(.16,1,.3,1);
+            box-shadow:
+                0 20px 80px rgba(0,0,0,0.35),
+                inset 0 1px rgba(255,255,255,0.07);
+        }
+
+        .inbox-button:hover {
+            transform: scale(1.07);
+            border-color: rgba(255,255,255,0.28);
+            box-shadow:
+                0 25px 100px rgba(255,255,255,0.08),
+                inset 0 1px rgba(255,255,255,0.12);
+        }
+
+        .inbox-button:active {
+            transform: scale(0.96);
+        }
+
+        .notification-count {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            min-width: 30px;
+            height: 30px;
+            padding: 0 8px;
+            border-radius: 20px;
+            background: white;
+            color: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* =========================
+           INBOX
+        ========================== */
+
+        .inbox-panel {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(3,5,9,0.75);
+            backdrop-filter: blur(15px);
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .inbox-panel.open {
+            display: block;
+            animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .inbox-content {
+            max-width: 700px;
+            margin: 50px auto;
+        }
+
+        .inbox-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .inbox-header h2 {
+            font-size: 32px;
+        }
+
+        .close-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: white;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .notification {
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.035);
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        .notification:hover {
+            background: rgba(255,255,255,0.07);
+            transform: translateX(4px);
+        }
+
+        .notification.unread {
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .notification-top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .sender {
+            font-weight: bold;
+        }
+
+        .time {
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+        }
+
+        .notification-title {
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+
+        .notification-message {
+            color: rgba(255,255,255,0.52);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .read-label {
+            display: inline-block;
+            margin-top: 12px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.35);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 70px 20px;
+            color: rgba(255,255,255,0.35);
+        }
+
+        @media (max-width: 600px) {
+            .dashboard {
+                padding: 25px;
+            }
+
+            .login-container {
+                padding: 30px;
+            }
+
+            .inbox-button {
+                width: 190px;
+                height: 190px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="background">
+        <div class="orb one"></div>
+        <div class="orb two"></div>
+    </div>
+
+    <!-- LOADING SCREEN -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loader-ring"></div>
+
+        <div class="loading-text" id="loadingText">
+            Loading
+        </div>
+
+        <div class="loading-bar">
+            <div class="loading-progress" id="loadingProgress"></div>
+        </div>
+    </div>
+
+    <!-- LOGIN PAGE -->
+    <main class="page" id="loginPage">
+
+        <div class="login-container">
+
+            <div class="logo">
+                L
+            </div>
+
+            <h1>Welcome back.</h1>
+
+            <p class="subtitle">
+                Sign in to continue.
+            </p>
+
+            <div class="input-group">
+                <label for="username">Username</label>
+
+                <input
+                    id="username"
+                    type="text"
+                    autocomplete="username"
+                    placeholder="Enter username"
+                >
+            </div>
+
+            <div class="input-group">
+                <label for="password">Password</label>
+
+                <input
+                    id="password"
+                    type="password"
+                    autocomplete="current-password"
+                    placeholder="Enter password"
+                >
+            </div>
+
+            <button class="login-button" id="loginButton">
+                Sign In
+            </button>
+
+            <div class="error" id="loginError"></div>
+
+        </div>
+
+    </main>
+
+    <!-- DASHBOARD -->
+    <main class="dashboard" id="dashboard">
+
+        <div class="topbar">
+
+            <div>
+                <div class="greeting" id="greeting">
+                    Good evening Landon
+                </div>
+
+                <div class="account-name">
+                    Personal Inbox
+                </div>
+            </div>
+
+            <button class="logout" id="logoutButton">
+                Log out
+            </button>
+
+        </div>
+
+        <div class="inbox-area">
+
+            <button class="inbox-button" id="inboxButton">
+
+                Inbox
+
+                <span class="notification-count" id="notificationCount">
+                    0
+                </span>
+
+            </button>
+
+        </div>
+
+    </main>
+
+    <!-- INBOX -->
+    <div class="inbox-panel" id="inboxPanel">
+
+        <div class="inbox-content">
+
+            <div class="inbox-header">
+
+                <h2>Inbox</h2>
+
+                <button class="close-button" id="closeInbox">
+                    ×
+                </button>
+
+            </div>
+
+            <div id="notifications"></div>
+
+        </div>
+
+    </div>
+
+    <script>
+        "use strict";
+
+        /* =========================
+           ACCOUNT DATA
+        ========================== */
+
+        const accounts = {
+            landon: {
+                username: "landon",
+                password: "landon",
+                displayName: "Landon"
+            },
+
+            mama: {
+                username: "mama",
+                password: "mama",
+                displayName: "Mama"
+            }
+        };
+
+        /* =========================
+           DOM REFERENCES
+        ========================== */
+
+        const loadingScreen = document.getElementById("loadingScreen");
+        const loadingText = document.getElementById("loadingText");
+        const loadingProgress = document.getElementById("loadingProgress");
+
+        const loginPage = document.getElementById("loginPage");
+        const loginButton = document.getElementById("loginButton");
+        const loginError = document.getElementById("loginError");
+
+        const usernameInput = document.getElementById("username");
+        const passwordInput = document.getElementById("password");
+
+        const dashboard = document.getElementById("dashboard");
+        const greeting = document.getElementById("greeting");
+
+        const inboxButton = document.getElementById("inboxButton");
+        const inboxPanel = document.getElementById("inboxPanel");
+        const closeInbox = document.getElementById("closeInbox");
+
+        const notificationsContainer =
+            document.getElementById("notifications");
+
+        const notificationCount =
+            document.getElementById("notificationCount");
+
+        const logoutButton =
+            document.getElementById("logoutButton");
+
+        /* =========================
+           LOADING SCREEN
+        ========================== */
+
+        function runLoadingScreen(callback) {
+            let progress = 0;
+
+            loadingScreen.classList.remove("hidden");
+
+            const loadingMessages = [
+                "Loading",
+                "Preparing",
+                "Almost there",
+                "Ready"
+            ];
+
+            const interval = setInterval(function () {
+
+                progress += Math.random() * 8 + 4;
+
+                if (progress >= 100) {
+                    progress = 100;
+                }
+
+                loadingProgress.style.width = progress + "%";
+
+                const messageIndex = Math.min(
+                    Math.floor(progress / 25),
+                    loadingMessages.length - 1
+                );
+
+                loadingText.textContent =
+                    loadingMessages[messageIndex];
+
+                if (progress >= 100) {
+
+                    clearInterval(interval);
+
+                    setTimeout(function () {
+
+                        loadingScreen.classList.add("hidden");
+
+                        if (typeof callback === "function") {
+                            callback();
+                        }
+
+                    }, 500);
+                }
+
+            }, 100);
+        }
+
+        /* =========================
+           TIME GREETING
+        ========================== */
+
+        function getGreeting() {
+
+            const hour = new Date().getHours();
+
+            if (hour >= 5 && hour < 12) {
+                return "Good morning";
+            }
+
+            if (hour >= 12 && hour < 18) {
+                return "Good afternoon";
+            }
+
+            if (hour >= 18 && hour < 22) {
+                return "Good evening";
+            }
+
+            return "Good night";
+        }
+
+        function updateGreeting() {
+            greeting.textContent =
+                getGreeting() + " Landon";
+        }
+
+        /* =========================
+           LOGIN
+        ========================== */
+
+        function login() {
+
+            const username =
+                usernameInput.value.trim().toLowerCase();
+
+            const password =
+                passwordInput.value;
+
+            const account = accounts[username];
+
+            if (!account || account.password !== password) {
+
+                loginError.textContent =
+                    "Incorrect username or password.";
+
+                return;
+            }
+
+            loginError.textContent = "";
+
+            /*
+             * Save the username locally so the user
+             * does not need to log in every time.
+             */
+            localStorage.setItem(
+                "loggedInUser",
+                account.username
+            );
+
+            if (account.username === "landon") {
+
+                runLoadingScreen(function () {
+
+                    loginPage.style.display = "none";
+
+                    updateGreeting();
+
+                    dashboard.classList.add("visible");
+
+                    updateNotificationCount();
+
+                });
+
+            } else {
+
+                /*
+                 * Mama account is included now so we
+                 * can add the sending interface later.
+                 */
+                runLoadingScreen(function () {
+
+                    loginPage.style.display = "none";
+
+                    dashboard.classList.add("visible");
+
+                    greeting.textContent =
+                        "Welcome Mama";
+
+                });
+            }
+        }
+
+        /* =========================
+           LOGOUT
+        ========================== */
+
+        function logout() {
+
+            localStorage.removeItem("loggedInUser");
+
+            dashboard.classList.remove("visible");
+
+            loginPage.style.display = "flex";
+
+            usernameInput.value = "";
+            passwordInput.value = "";
+
+            inboxPanel.classList.remove("open");
+
+            runLoadingScreen();
+        }
+
+        /* =========================
+           NOTIFICATIONS
+        ========================== */
+
+        function getNotifications() {
+
+            const saved =
+                localStorage.getItem("notifications");
+
+            if (saved) {
+                try {
+                    return JSON.parse(saved);
+                } catch (error) {
+                    console.error(
+                        "Could not load notifications:",
+                        error
+                    );
+                }
+            }
+
+            /*
+             * Example notification.
+             * Later, Mama's account can create
+             * notifications through an actual UI.
+             */
+            return [
+                {
+                    id: 1,
+                    sender: "Mama",
+                    title: "Welcome!",
+                    message: "Welcome to your new inbox.",
+                    time: "Just now",
+                    read: false
+                }
+            ];
+        }
+
+        function saveNotifications(notifications) {
+
+            localStorage.setItem(
+                "notifications",
+                JSON.stringify(notifications)
+            );
+        }
+
+        function renderNotifications() {
+
+            const notifications =
+                getNotifications();
+
+            notificationsContainer.innerHTML = "";
+
+            if (notifications.length === 0) {
+
+                notificationsContainer.innerHTML =
+                    '<div class="empty">Your inbox is empty.</div>';
+
+                return;
+            }
+
+            notifications.forEach(function (notification) {
+
+                const element =
+                    document.createElement("div");
+
+                element.className =
+                    "notification" +
+                    (notification.read ? "" : " unread");
+
+                element.innerHTML = `
+                    <div class="notification-top">
+                        <span class="sender">
+                            ${escapeHTML(notification.sender)}
+                        </span>
+
+                        <span class="time">
+                            ${escapeHTML(notification.time)}
+                        </span>
+                    </div>
+
+                    <div class="notification-title">
+                        ${escapeHTML(notification.title)}
+                    </div>
+
+                    <div class="notification-message">
+                        ${escapeHTML(notification.message)}
+                    </div>
+
+                    <span class="read-label">
+                        ${notification.read ? "Read" : "Unread"}
+                    </span>
+                `;
+
+                element.addEventListener(
+                    "click",
+                    function () {
+
+                        notification.read = true;
+
+                        saveNotifications(notifications);
+
+                        renderNotifications();
+
+                        updateNotificationCount();
+
+                    }
+                );
+
+                notificationsContainer.appendChild(element);
+
+            });
+        }
+
+        function updateNotificationCount() {
+
+            const notifications =
+                getNotifications();
+
+            const unread =
+                notifications.filter(function (notification) {
+                    return !notification.read;
+                }).length;
+
+            notificationCount.textContent = unread;
+
+            if (unread === 0) {
+                notificationCount.style.display = "none";
+            } else {
+                notificationCount.style.display = "flex";
+            }
+        }
+
+        /* =========================
+           HTML SAFETY
+        ========================== */
+
+        function escapeHTML(value) {
+
+            const div =
+                document.createElement("div");
+
+            div.textContent = String(value);
+
+            return div.innerHTML;
+        }
+
+        /* =========================
+           EVENTS
+        ========================== */
+
+        loginButton.addEventListener(
+            "click",
+            login
+        );
+
+        passwordInput.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (event.key === "Enter") {
+                    login();
+                }
+
+            }
+        );
+
+        usernameInput.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (event.key === "Enter") {
+                    login();
+                }
+
+            }
+        );
+
+        inboxButton.addEventListener(
+            "click",
+            function () {
+
+                renderNotifications();
+
+                inboxPanel.classList.add("open");
+
+            }
+        );
+
+        closeInbox.addEventListener(
+            "click",
+            function () {
+
+                inboxPanel.classList.remove("open");
+
+            }
+        );
+
+        logoutButton.addEventListener(
+            "click",
+            logout
+        );
+
+        /* =========================
+           STARTUP
+        ========================== */
+
+        function startApplication() {
+
+            runLoadingScreen(function () {
+
+                const savedUser =
+                    localStorage.getItem("loggedInUser");
+
+                if (savedUser === "landon") {
+
+                    loginPage.style.display = "none";
+
+                    runLoadingScreen(function () {
+
+                        updateGreeting();
+
+                        dashboard.classList.add("visible");
+
+                        updateNotificationCount();
+
+                    });
+
+                    return;
+                }
+
+                loginPage.style.display = "flex";
+
+            });
+        }
+
+        startApplication();
+    </script>
+
+</body>
+</html>
+```
