@@ -564,5 +564,2901 @@
             border-bottom-left-radius: 4px;
         }
 
-        .chatMessage.
+        .chatMessage.user .chatBubble {
+            background: #61a8ff;
+            color: #06101e;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chatName {
+            font-size: 11px;
+            color: #738198;
+            margin-bottom: 4px;
+        }
+
+        .chatInputArea {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            border-top: 1px solid rgba(255,255,255,0.07);
+            background: #0d121c;
+        }
+
+        .chatInput {
+            flex: 1;
+            resize: none;
+            min-height: 46px;
+            max-height: 130px;
+            padding: 13px;
+            background: #151c29;
+            border: 1px solid #29344a;
+            border-radius: 11px;
+            color: white;
+            outline: none;
+        }
+
+        .chatInput:focus {
+            border-color: #61a8ff;
+        }
+
+        .sendButton {
+            width: 95px;
+            border: none;
+            border-radius: 11px;
+            background: #61a8ff;
+            color: #06101e;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .sendButton:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .typing {
+            color: #8390a5;
+            font-size: 13px;
+            padding: 0 20px 12px;
+            display: none;
+        }
+
+        @media (max-width: 650px) {
+
+            .topbar {
+                padding: 0 15px;
+            }
+
+            .greeting {
+                font-size: 16px;
+            }
+
+            .languageSelect {
+                max-width: 100px;
+            }
+
+            .dashboardButton {
+                width: 175px;
+                height: 175px;
+            }
+
+            .buttonIcon {
+                font-size: 38px;
+            }
+
+            .buttonTitle {
+                font-size: 18px;
+            }
+
+            .unreadBadge {
+                margin-left: 110px;
+                margin-top: -160px;
+            }
+
+            .chatBubble {
+                max-width: 88%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================
+         LOADING
+    ========================= -->
+
+    <div id="loadingScreen">
+
+        <div class="loadingBox">
+
+            <div class="loadingTitle">
+                PERSONAL
+            </div>
+
+            <div class="spinner"></div>
+
+            <div
+                class="loadingText"
+                id="loadingText"
+            >
+                Starting up...
+            </div>
+
+            <div class="progress">
+
+                <div
+                    class="progressBar"
+                    id="progressBar"
+                ></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         LOGIN
+    ========================= -->
+
+    <div id="loginPage">
+
+        <div class="loginCard">
+
+            <h1>Welcome back</h1>
+
+            <p>
+                Sign in to continue to your dashboard.
+            </p>
+
+            <div class="inputGroup">
+
+                <label>
+                    Username
+                </label>
+
+                <input
+                    type="text"
+                    id="username"
+                    autocomplete="username"
+                    placeholder="Enter username"
+                >
+
+            </div>
+
+            <div class="inputGroup">
+
+                <label>
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="password"
+                    autocomplete="current-password"
+                    placeholder="Enter password"
+                >
+
+            </div>
+
+            <button
+                class="loginButton"
+                onclick="login()"
+            >
+                Login
+            </button>
+
+            <div
+                class="loginError"
+                id="loginError"
+            >
+                Incorrect username or password.
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         DASHBOARD
+    ========================= -->
+
+    <div id="dashboard">
+
+        <div class="topbar">
+
+            <div
+                class="greeting"
+                id="greeting"
+            >
+                Good afternoon
+            </div>
+
+            <div class="topRight">
+
+                <select
+                    class="languageSelect"
+                    id="languageSelect"
+                    onchange="changeLanguage()"
+                    title="Website language"
+                >
+
+                    <option value="en">
+                        English
+                    </option>
+
+                    <option value="id">
+                        Bahasa Indonesia
+                    </option>
+
+                    <option value="es">
+                        Español
+                    </option>
+
+                    <option value="fr">
+                        Français
+                    </option>
+
+                    <option value="de">
+                        Deutsch
+                    </option>
+
+                    <option value="zh">
+                        中文
+                    </option>
+
+                    <option value="ja">
+                        日本語
+                    </option>
+
+                    <option value="ko">
+                        한국어
+                    </option>
+
+                </select>
+
+                <button
+                    class="logoutButton"
+                    onclick="logout()"
+                >
+                    Logout
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="dashboardContent">
+
+            <div class="dashboardCenter">
+
+                <h2 id="dashboardTitle">
+                    What would you like to do?
+                </h2>
+
+
+                <div class="dashboardButtons">
+
+                    <!-- INBOX -->
+
+                    <div style="position: relative;">
+
+                        <button
+                            class="dashboardButton"
+                            onclick="openInbox()"
+                        >
+
+                            <span class="buttonIcon">
+                                📨
+                            </span>
+
+                            <span
+                                class="buttonTitle"
+                                id="inboxButtonText"
+                            >
+                                Inbox
+                            </span>
+
+                            <span
+                                class="buttonSub"
+                                id="inboxSubText"
+                            >
+                                Your notifications
+                            </span>
+
+                        </button>
+
+
+                        <div
+                            class="unreadBadge"
+                            id="unreadBadge"
+                        >
+                            0
+                        </div>
+
+                    </div>
+
+
+                    <!-- AI -->
+
+                    <button
+                        class="dashboardButton"
+                        onclick="openAI()"
+                    >
+
+                        <span class="buttonIcon">
+                            🤖
+                        </span>
+
+                        <span
+                            class="buttonTitle"
+                            id="aiButtonText"
+                        >
+                            AI Assistant
+                        </span>
+
+                        <span
+                            class="buttonSub"
+                            id="aiSubText"
+                        >
+                            Ask me anything
+                        </span>
+
+                    </button>
+
+                </div>
+
+
+                <!-- =========================
+                     SYSTEM TEST PANEL
+                ========================= -->
+
+                <div
+                    class="systemPanel"
+                    id="systemPanel"
+                >
+
+                    <h3>
+                        System Notification Tester
+                    </h3>
+
+                    <p>
+                        Use these buttons to test the food notification flow without waiting for the scheduled time.
+                    </p>
+
+                    <div class="testButtons">
+
+                        <button
+                            class="testButton"
+                            onclick="testNotification('breakfast')"
+                        >
+                            🍳 Test Breakfast
+                        </button>
+
+                        <button
+                            class="testButton"
+                            onclick="testNotification('lunch')"
+                        >
+                            🍱 Test Lunch
+                        </button>
+
+                        <button
+                            class="testButton"
+                            onclick="testNotification('dinner')"
+                        >
+                            🍽️ Test Dinner
+                        </button>
+
+                    </div>
+
+                    <div
+                        class="testStatus"
+                        id="testStatus"
+                    ></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         INBOX MODAL
+    ========================= -->
+
+    <div
+        class="modalOverlay"
+        id="inboxModal"
+        onclick="closeModalIfBackground(event, 'inboxModal')"
+    >
+
+        <div class="modal">
+
+            <div class="modalHeader">
+
+                <h2 id="inboxTitle">
+                    Inbox
+                </h2>
+
+                <button
+                    class="closeButton"
+                    onclick="closeInbox()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+            <div
+                class="notifications"
+                id="notifications"
+            ></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         AI MODAL
+    ========================= -->
+
+    <div
+        class="modalOverlay"
+        id="aiModal"
+        onclick="closeModalIfBackground(event, 'aiModal')"
+    >
+
+        <div class="modal aiModal">
+
+            <div class="modalHeader">
+
+                <h2 id="aiTitle">
+                    AI Assistant
+                </h2>
+
+                <button
+                    class="closeButton"
+                    onclick="closeAI()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+            <div
+                class="chatMessages"
+                id="chatMessages"
+            ></div>
+
+            <div
+                class="typing"
+                id="typingIndicator"
+            >
+                AI is thinking...
+            </div>
+
+            <div class="chatInputArea">
+
+                <textarea
+                    class="chatInput"
+                    id="chatInput"
+                    placeholder="Ask me anything..."
+                    rows="1"
+                ></textarea>
+
+                <button
+                    class="sendButton"
+                    id="sendButton"
+                    onclick="sendMessage()"
+                >
+                    Send
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        /* =========================
+           ACCOUNT DATA
+        ========================= */
+
+        const accounts = {
+
+            landon: {
+                password: "landon",
+                displayName: "Landon"
+            },
+
+            mama: {
+                password: "mama",
+                displayName: "Mama"
+            },
+
+            system: {
+                password: "system",
+                displayName: "System"
+            }
+
+        };
+
+
+        let currentUser = null;
+
+        let chatMessages = [];
+
+        let sharedNotifications = [];
+
+
+        /* =========================
+           PUSH NOTIFICATIONS
+        ========================= */
+
+        const VAPID_PUBLIC_KEY =
+            "BHpapDcdOL1jssjCsGOaz7QbRFS_LihJPCvvZdKfobckvd_t-AkxgQ4YhS7QGg-Qm8ktWcgTgyl2i1iE_tQMOkk";
+
+
+        function urlBase64ToUint8Array(
+            base64String
+        ) {
+
+            const padding =
+                "=".repeat(
+                    (4 - base64String.length % 4) % 4
+                );
+
+            const base64 =
+                (
+                    base64String +
+                    padding
+                )
+                    .replace(/-/g, "+")
+                    .replace(/_/g, "/");
+
+            const rawData =
+                window.atob(base64);
+
+            return Uint8Array.from(
+                [...rawData].map(
+                    char =>
+                        char.charCodeAt(0)
+                )
+            );
+        }
+
+
+        async function setupPushNotifications() {
+
+            if (
+                !("serviceWorker" in navigator) ||
+                !("PushManager" in window) ||
+                !("Notification" in window)
+            ) {
+
+                console.log(
+                    "Push notifications are not supported."
+                );
+
+                return;
+            }
+
+            try {
+
+                const registration =
+                    await navigator.serviceWorker.register(
+                        "/sw.js"
+                    );
+
+                let permission =
+                    Notification.permission;
+
+                if (
+                    permission === "default"
+                ) {
+
+                    permission =
+                        await Notification.requestPermission();
+
+                }
+
+                if (
+                    permission !== "granted"
+                ) {
+
+                    console.log(
+                        "Notification permission was not granted."
+                    );
+
+                    return;
+                }
+
+                let subscription =
+                    await registration.pushManager.getSubscription();
+
+                if (!subscription) {
+
+                    subscription =
+                        await registration.pushManager.subscribe({
+
+                            userVisibleOnly: true,
+
+                            applicationServerKey:
+                                urlBase64ToUint8Array(
+                                    VAPID_PUBLIC_KEY
+                                )
+
+                        });
+
+                }
+
+                await fetch(
+                    "/api/subscribe",
+                    {
+
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+
+                            username:
+                                currentUser.username,
+
+                            subscription
+
+                        })
+
+                    }
+                );
+
+                console.log(
+                    "Push notifications connected."
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Push setup error:",
+                    error
+                );
+
+            }
+        }
+
+
+        /* =========================
+           TRANSLATIONS
+        ========================= */
+
+        const translations = {
+
+            en: {
+                dashboard:
+                    "What would you like to do?",
+
+                inbox:
+                    "Inbox",
+
+                inboxSub:
+                    "Your notifications",
+
+                ai:
+                    "AI Assistant",
+
+                aiSub:
+                    "Ask me anything",
+
+                logout:
+                    "Logout",
+
+                inboxTitle:
+                    "Inbox",
+
+                aiTitle:
+                    "AI Assistant",
+
+                send:
+                    "Send",
+
+                placeholder:
+                    "Ask me anything...",
+
+                thinking:
+                    "AI is thinking...",
+
+                empty:
+                    "No notifications yet.",
+
+                yes:
+                    "Yes",
+
+                no:
+                    "No",
+
+                whatDidYouEat:
+                    "What did you eat?",
+
+                submit:
+                    "Submit",
+
+                saving:
+                    "Saving...",
+
+                answered:
+                    "Answer saved."
+            },
+
+            id: {
+                dashboard:
+                    "Apa yang ingin kamu lakukan?",
+
+                inbox:
+                    "Kotak Masuk",
+
+                inboxSub:
+                    "Notifikasi kamu",
+
+                ai:
+                    "Asisten AI",
+
+                aiSub:
+                    "Tanyakan apa saja",
+
+                logout:
+                    "Keluar",
+
+                inboxTitle:
+                    "Kotak Masuk",
+
+                aiTitle:
+                    "Asisten AI",
+
+                send:
+                    "Kirim",
+
+                placeholder:
+                    "Tanyakan apa saja...",
+
+                thinking:
+                    "AI sedang berpikir...",
+
+                empty:
+                    "Belum ada notifikasi.",
+
+                yes:
+                    "Ya",
+
+                no:
+                    "Tidak",
+
+                whatDidYouEat:
+                    "Apa yang kamu makan?",
+
+                submit:
+                    "Kirim",
+
+                saving:
+                    "Menyimpan...",
+
+                answered:
+                    "Jawaban tersimpan."
+            },
+
+            es: {
+                dashboard:
+                    "¿Qué te gustaría hacer?",
+
+                inbox:
+                    "Bandeja",
+
+                inboxSub:
+                    "Tus notificaciones",
+
+                ai:
+                    "Asistente IA",
+
+                aiSub:
+                    "Pregúntame lo que quieras",
+
+                logout:
+                    "Cerrar sesión",
+
+                inboxTitle:
+                    "Bandeja",
+
+                aiTitle:
+                    "Asistente IA",
+
+                send:
+                    "Enviar",
+
+                placeholder:
+                    "Pregúntame lo que quieras...",
+
+                thinking:
+                    "La IA está pensando...",
+
+                empty:
+                    "No hay notificaciones.",
+
+                yes:
+                    "Sí",
+
+                no:
+                    "No",
+
+                whatDidYouEat:
+                    "¿Qué comiste?",
+
+                submit:
+                    "Enviar",
+
+                saving:
+                    "Guardando...",
+
+                answered:
+                    "Respuesta guardada."
+            },
+
+            fr: {
+                dashboard:
+                    "Que souhaitez-vous faire ?",
+
+                inbox:
+                    "Boîte de réception",
+
+                inboxSub:
+                    "Vos notifications",
+
+                ai:
+                    "Assistant IA",
+
+                aiSub:
+                    "Demandez-moi n'importe quoi",
+
+                logout:
+                    "Déconnexion",
+
+                inboxTitle:
+                    "Boîte de réception",
+
+                aiTitle:
+                    "Assistant IA",
+
+                send:
+                    "Envoyer",
+
+                placeholder:
+                    "Demandez-moi n'importe quoi...",
+
+                thinking:
+                    "L'IA réfléchit...",
+
+                empty:
+                    "Aucune notification.",
+
+                yes:
+                    "Oui",
+
+                no:
+                    "Non",
+
+                whatDidYouEat:
+                    "Qu'avez-vous mangé ?",
+
+                submit:
+                    "Envoyer",
+
+                saving:
+                    "Enregistrement...",
+
+                answered:
+                    "Réponse enregistrée."
+            },
+
+            de: {
+                dashboard:
+                    "Was möchtest du tun?",
+
+                inbox:
+                    "Posteingang",
+
+                inboxSub:
+                    "Deine Benachrichtigungen",
+
+                ai:
+                    "KI-Assistent",
+
+                aiSub:
+                    "Frag mich alles",
+
+                logout:
+                    "Abmelden",
+
+                inboxTitle:
+                    "Posteingang",
+
+                aiTitle:
+                    "KI-Assistent",
+
+                send:
+                    "Senden",
+
+                placeholder:
+                    "Frag mich alles...",
+
+                thinking:
+                    "Die KI denkt nach...",
+
+                empty:
+                    "Noch keine Benachrichtigungen.",
+
+                yes:
+                    "Ja",
+
+                no:
+                    "Nein",
+
+                whatDidYouEat:
+                    "Was hast du gegessen?",
+
+                submit:
+                    "Senden",
+
+                saving:
+                    "Speichern...",
+
+                answered:
+                    "Antwort gespeichert."
+            },
+
+            zh: {
+                dashboard:
+                    "你想做什么？",
+
+                inbox:
+                    "收件箱",
+
+                inboxSub:
+                    "你的通知",
+
+                ai:
+                    "AI 助手",
+
+                aiSub:
+                    "问我任何问题",
+
+                logout:
+                    "退出登录",
+
+                inboxTitle:
+                    "收件箱",
+
+                aiTitle:
+                    "AI 助手",
+
+                send:
+                    "发送",
+
+                placeholder:
+                    "问我任何问题...",
+
+                thinking:
+                    "AI 正在思考...",
+
+                empty:
+                    "暂无通知。",
+
+                yes:
+                    "是",
+
+                no:
+                    "否",
+
+                whatDidYouEat:
+                    "你吃了什么？",
+
+                submit:
+                    "提交",
+
+                saving:
+                    "保存中...",
+
+                answered:
+                    "答案已保存。"
+            },
+
+            ja: {
+                dashboard:
+                    "何をしますか？",
+
+                inbox:
+                    "受信トレイ",
+
+                inboxSub:
+                    "あなたの通知",
+
+                ai:
+                    "AIアシスタント",
+
+                aiSub:
+                    "何でも聞いてください",
+
+                logout:
+                    "ログアウト",
+
+                inboxTitle:
+                    "受信トレイ",
+
+                aiTitle:
+                    "AIアシスタント",
+
+                send:
+                    "送信",
+
+                placeholder:
+                    "何でも聞いてください...",
+
+                thinking:
+                    "AIが考えています...",
+
+                empty:
+                    "通知はありません。",
+
+                yes:
+                    "はい",
+
+                no:
+                    "いいえ",
+
+                whatDidYouEat:
+                    "何を食べましたか？",
+
+                submit:
+                    "送信",
+
+                saving:
+                    "保存中...",
+
+                answered:
+                    "回答を保存しました。"
+            },
+
+            ko: {
+                dashboard:
+                    "무엇을 하시겠어요?",
+
+                inbox:
+                    "받은 편지함",
+
+                inboxSub:
+                    "알림",
+
+                ai:
+                    "AI 어시스턴트",
+
+                aiSub:
+                    "무엇이든 물어보세요",
+
+                logout:
+                    "로그아웃",
+
+                inboxTitle:
+                    "받은 편지함",
+
+                aiTitle:
+                    "AI 어시스턴트",
+
+                send:
+                    "보내기",
+
+                placeholder:
+                    "무엇이든 물어보세요...",
+
+                thinking:
+                    "AI가 생각하고 있습니다...",
+
+                empty:
+                    "알림이 없습니다.",
+
+                yes:
+                    "예",
+
+                no:
+                    "아니요",
+
+                whatDidYouEat:
+                    "무엇을 먹었나요?",
+
+                submit:
+                    "제출",
+
+                saving:
+                    "저장 중...",
+
+                answered:
+                    "답변이 저장되었습니다."
+            }
+
+        };
+
+
+        /* =========================
+           LOADING
+        ========================= */
+
+        function runLoadingScreen(
+            callback
+        ) {
+
+            const loadingScreen =
+                document.getElementById(
+                    "loadingScreen"
+                );
+
+            const progressBar =
+                document.getElementById(
+                    "progressBar"
+                );
+
+            const loadingText =
+                document.getElementById(
+                    "loadingText"
+                );
+
+            const messages = [
+
+                "Starting up...",
+
+                "Preparing dashboard...",
+
+                "Loading your account...",
+
+                "Almost ready..."
+
+            ];
+
+            let progress = 0;
+
+            loadingScreen.style.display =
+                "flex";
+
+            loadingScreen.style.opacity =
+                "1";
+
+            const interval =
+                setInterval(() => {
+
+                    progress += 5;
+
+                    progressBar.style.width =
+                        progress + "%";
+
+                    const index =
+                        Math.min(
+                            Math.floor(
+                                progress / 25
+                            ),
+                            messages.length - 1
+                        );
+
+                    loadingText.textContent =
+                        messages[index];
+
+                    if (progress >= 100) {
+
+                        clearInterval(
+                            interval
+                        );
+
+                        setTimeout(() => {
+
+                            loadingScreen.style.opacity =
+                                "0";
+
+                            setTimeout(() => {
+
+                                loadingScreen.style.display =
+                                    "none";
+
+                                if (callback) {
+                                    callback();
+                                }
+
+                            }, 600);
+
+                        }, 250);
+
+                    }
+
+                }, 70);
+
+        }
+
+
+        /* =========================
+           GREETING
+        ========================= */
+
+        function getGreeting(name) {
+
+            const hour =
+                new Date().getHours();
+
+            if (
+                hour >= 5 &&
+                hour < 12
+            ) {
+
+                return (
+                    "Good morning " +
+                    name
+                );
+
+            }
+
+            if (
+                hour >= 12 &&
+                hour < 18
+            ) {
+
+                return (
+                    "Good afternoon " +
+                    name
+                );
+
+            }
+
+            if (
+                hour >= 18 &&
+                hour < 22
+            ) {
+
+                return (
+                    "Good evening " +
+                    name
+                );
+
+            }
+
+            return (
+                "Good night " +
+                name
+            );
+        }
+
+
+        /* =========================
+           LOGIN
+        ========================= */
+
+        function login() {
+
+            const username =
+                document.getElementById(
+                    "username"
+                )
+                    .value
+                    .trim()
+                    .toLowerCase();
+
+            const password =
+                document.getElementById(
+                    "password"
+                ).value;
+
+            const error =
+                document.getElementById(
+                    "loginError"
+                );
+
+            if (
+                accounts[username] &&
+                accounts[username].password ===
+                    password
+            ) {
+
+                currentUser = {
+
+                    username,
+
+                    displayName:
+                        accounts[
+                            username
+                        ].displayName
+
+                };
+
+                localStorage.setItem(
+                    "loggedInUser",
+                    username
+                );
+
+                error.style.display =
+                    "none";
+
+                document.getElementById(
+                    "loginPage"
+                ).style.display =
+                    "none";
+
+                runLoadingScreen(() => {
+
+                    showDashboard();
+
+                });
+
+            } else {
+
+                error.style.display =
+                    "block";
+
+            }
+
+        }
+
+
+        /* =========================
+           DASHBOARD
+        ========================= */
+
+        function showDashboard() {
+
+            document.getElementById(
+                "dashboard"
+            ).style.display =
+                "block";
+
+            updateGreeting();
+
+            loadLanguage();
+
+            setupSystemPanel();
+
+            loadNotifications();
+
+            setupPushNotifications();
+
+        }
+
+
+        function updateGreeting() {
+
+            if (!currentUser) {
+                return;
+            }
+
+            document.getElementById(
+                "greeting"
+            ).textContent =
+                getGreeting(
+                    currentUser.displayName
+                );
+
+        }
+
+
+        /* =========================
+           SYSTEM PANEL
+        ========================= */
+
+        function setupSystemPanel() {
+
+            const panel =
+                document.getElementById(
+                    "systemPanel"
+                );
+
+            if (!panel) return;
+
+            if (
+                currentUser &&
+                currentUser.username ===
+                    "system"
+            ) {
+
+                panel.style.display =
+                    "block";
+
+            } else {
+
+                panel.style.display =
+                    "none";
+
+            }
+
+        }
+
+
+        async function testNotification(
+            type
+        ) {
+
+            if (
+                !currentUser ||
+                currentUser.username !==
+                    "system"
+            ) {
+                return;
+            }
+
+            const status =
+                document.getElementById(
+                    "testStatus"
+                );
+
+            status.textContent =
+                "Sending test " +
+                type +
+                " notification...";
+
+            try {
+
+                /*
+                 * This calls the notification
+                 * backend in test mode.
+                 */
+
+                const response =
+                    await fetch(
+                        "/api/notifications?test=" +
+                        encodeURIComponent(type),
+                        {
+                            method: "GET"
+                        }
+                    );
+
+                const data =
+                    await response.json();
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error ||
+                        "Test notification failed."
+                    );
+
+                }
+
+                status.textContent =
+                    "Test " +
+                    type +
+                    " notification sent.";
+
+                await loadNotifications();
+
+            } catch (error) {
+
+                console.error(
+                    "Test notification error:",
+                    error
+                );
+
+                status.textContent =
+                    "Test failed: " +
+                    error.message;
+
+            }
+
+        }
+
+
+        /* =========================
+           LANGUAGE
+        ========================= */
+
+        function getLanguage() {
+
+            return (
+                localStorage.getItem(
+                    "selectedLanguage"
+                ) || "en"
+            );
+
+        }
+
+
+        function changeLanguage() {
+
+            const language =
+                document.getElementById(
+                    "languageSelect"
+                ).value;
+
+            localStorage.setItem(
+                "selectedLanguage",
+                language
+            );
+
+            updateLanguage();
+
+        }
+
+
+        function loadLanguage() {
+
+            const select =
+                document.getElementById(
+                    "languageSelect"
+                );
+
+            select.value =
+                getLanguage();
+
+            updateLanguage();
+
+        }
+
+
+        function updateLanguage() {
+
+            const language =
+                getLanguage();
+
+            const t =
+                translations[language] ||
+                translations.en;
+
+            document.getElementById(
+                "dashboardTitle"
+            ).textContent =
+                t.dashboard;
+
+            document.getElementById(
+                "inboxButtonText"
+            ).textContent =
+                t.inbox;
+
+            document.getElementById(
+                "inboxSubText"
+            ).textContent =
+                t.inboxSub;
+
+            document.getElementById(
+                "aiButtonText"
+            ).textContent =
+                t.ai;
+
+            document.getElementById(
+                "aiSubText"
+            ).textContent =
+                t.aiSub;
+
+            document.querySelector(
+                ".logoutButton"
+            ).textContent =
+                t.logout;
+
+            document.getElementById(
+                "inboxTitle"
+            ).textContent =
+                t.inboxTitle;
+
+            document.getElementById(
+                "aiTitle"
+            ).textContent =
+                t.aiTitle;
+
+            document.getElementById(
+                "sendButton"
+            ).textContent =
+                t.send;
+
+            document.getElementById(
+                "chatInput"
+            ).placeholder =
+                t.placeholder;
+
+            document.getElementById(
+                "typingIndicator"
+            ).textContent =
+                t.thinking;
+
+            renderNotifications();
+
+        }
+
+
+        /* =========================
+           LOGOUT
+        ========================= */
+
+        function logout() {
+
+            localStorage.removeItem(
+                "loggedInUser"
+            );
+
+            currentUser = null;
+
+            document.getElementById(
+                "dashboard"
+            ).style.display =
+                "none";
+
+            document.getElementById(
+                "loginPage"
+            ).style.display =
+                "none";
+
+            runLoadingScreen(() => {
+
+                document.getElementById(
+                    "loginPage"
+                ).style.display =
+                    "flex";
+
+                document.getElementById(
+                    "username"
+                ).value =
+                    "";
+
+                document.getElementById(
+                    "password"
+                ).value =
+                    "";
+
+            });
+
+        }
+
+
+        /* =========================
+           SHARED NOTIFICATIONS
+        ========================= */
+
+        async function loadNotifications() {
+
+            if (!currentUser) {
+                return;
+            }
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/data?username=" +
+                        encodeURIComponent(
+                            currentUser.username
+                        )
+                    );
+
+                const data =
+                    await response.json();
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error ||
+                        "Failed to load notifications"
+                    );
+
+                }
+
+                sharedNotifications =
+                    Array.isArray(
+                        data.notifications
+                    )
+                        ? data.notifications
+                        : [];
+
+                renderNotifications();
+
+                updateUnreadCount();
+
+            } catch (error) {
+
+                console.error(
+                    "Notification loading error:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        function getReadNotifications() {
+
+            return JSON.parse(
+                localStorage.getItem(
+                    "readNotifications:" +
+                    currentUser.username
+                ) || "[]"
+            );
+
+        }
+
+
+        function isRead(id) {
+
+            return getReadNotifications()
+                .includes(
+                    String(id)
+                );
+
+        }
+
+
+        function markNotificationRead(
+            id
+        ) {
+
+            const read =
+                getReadNotifications();
+
+            const stringId =
+                String(id);
+
+            if (
+                !read.includes(
+                    stringId
+                )
+            ) {
+
+                read.push(
+                    stringId
+                );
+
+            }
+
+            localStorage.setItem(
+                "readNotifications:" +
+                currentUser.username,
+                JSON.stringify(read)
+            );
+
+            renderNotifications();
+
+            updateUnreadCount();
+
+        }
+
+
+        function updateUnreadCount() {
+
+            const notifications =
+                getVisibleNotifications();
+
+            const unread =
+                notifications.filter(
+                    notification =>
+                        !isRead(
+                            notification.id
+                        )
+                ).length;
+
+            const badge =
+                document.getElementById(
+                    "unreadBadge"
+                );
+
+            if (unread > 0) {
+
+                badge.textContent =
+                    unread > 99
+                        ? "99+"
+                        : unread;
+
+                badge.style.display =
+                    "flex";
+
+            } else {
+
+                badge.style.display =
+                    "none";
+
+            }
+
+        }
+
+
+        function getVisibleNotifications() {
+
+            if (!currentUser) {
+                return [];
+            }
+
+            const now =
+                Date.now();
+
+            const lifetime =
+                24 *
+                60 *
+                60 *
+                1000;
+
+            return sharedNotifications
+                .filter(
+                    notification => {
+
+                        if (
+                            !notification.createdAt
+                        ) {
+                            return false;
+                        }
+
+                        const age =
+                            now -
+                            new Date(
+                                notification.createdAt
+                            ).getTime();
+
+                        if (
+                            age > lifetime
+                        ) {
+                            return false;
+                        }
+
+                        /*
+                         * Landon sees notifications
+                         * sent to Landon.
+                         */
+
+                        if (
+                            currentUser.username ===
+                            "landon"
+                        ) {
+
+                            return (
+                                notification.recipient ===
+                                "landon"
+                            );
+
+                        }
+
+                        /*
+                         * Mama sees her reminders
+                         * and Landon's food messages.
+                         */
+
+                        if (
+                            currentUser.username ===
+                            "mama"
+                        ) {
+
+                            return (
+                                notification.recipient ===
+                                    "mama" ||
+                                notification.recipient ===
+                                    "landon"
+                            );
+
+                        }
+
+                        /*
+                         * System does not need
+                         * normal notifications.
+                         */
+
+                        if (
+                            currentUser.username ===
+                            "system"
+                        ) {
+
+                            return false;
+
+                        }
+
+                        return false;
+
+                    }
+                );
+
+        }
+
+
+        function renderNotifications() {
+
+            const container =
+                document.getElementById(
+                    "notifications"
+                );
+
+            if (!container) {
+                return;
+            }
+
+            const notifications =
+                getVisibleNotifications();
+
+            if (
+                notifications.length ===
+                0
+            ) {
+
+                const language =
+                    getLanguage();
+
+                container.innerHTML = `
+                    <div class="emptyState">
+                        ${
+                            translations[
+                                language
+                            ].empty
+                        }
+                    </div>
+                `;
+
+                return;
+
+            }
+
+            container.innerHTML =
+                notifications
+                    .sort(
+                        (a, b) =>
+                            new Date(
+                                b.createdAt
+                            ) -
+                            new Date(
+                                a.createdAt
+                            )
+                    )
+                    .map(
+                        notification =>
+                            renderNotification(
+                                notification
+                            )
+                    )
+                    .join("");
+
+            updateUnreadCount();
+
+        }
+
+
+        function renderNotification(
+            notification
+        ) {
+
+            const date =
+                new Date(
+                    notification.createdAt
+                );
+
+            const read =
+                isRead(
+                    notification.id
+                );
+
+            const language =
+                getLanguage();
+
+            const t =
+                translations[
+                    language
+                ] ||
+                translations.en;
+
+            let title =
+                notification.title;
+
+            let message =
+                notification.body ||
+                "";
+
+            let sender =
+                "System";
+
+
+            /* =========================
+               MAMA VIEW
+            ========================= */
+
+            if (
+                currentUser.username ===
+                    "mama" &&
+                notification.recipient ===
+                    "landon" &&
+                notification.type ===
+                    "food"
+            ) {
+
+                title =
+                    notification.mamaTitle ||
+                    "Send Notification to Landon";
+
+                message =
+                    notification.mamaBody ||
+                    "";
+
+                sender =
+                    "Mama";
+
+                if (
+                    notification.answer
+                ) {
+
+                    if (
+                        notification.answer ===
+                        "Yes"
+                    ) {
+
+                        message +=
+                            "<br><br><strong>" +
+                            "Landon ate: " +
+                            escapeHTML(
+                                notification.food ||
+                                "Food"
+                            ) +
+                            "</strong>";
+
+                    } else {
+
+                        message +=
+                            "<br><br><strong>" +
+                            "Landon did not eat yet." +
+                            "</strong>";
+
+                    }
+
+                }
+
+            }
+
+            /* =========================
+               LANDON VIEW
+            ========================= */
+
+            else if (
+                currentUser.username ===
+                "landon"
+            ) {
+
+                sender =
+                    "Mama";
+
+            }
+
+            /* =========================
+               MAMA SYSTEM REMINDER
+            ========================= */
+
+            else if (
+                notification.recipient ===
+                "mama"
+            ) {
+
+                sender =
+                    "System";
+
+            }
+
+
+            let actions =
+                "";
+
+
+            /* =========================
+               LANDON ANSWER BUTTONS
+            ========================= */
+
+            if (
+                currentUser.username ===
+                    "landon" &&
+                notification.type ===
+                    "food" &&
+                !notification.answer
+            ) {
+
+                actions = `
+
+                    <div
+                        class="notificationActions"
+                    >
+
+                        <button
+                            class="answerButton"
+                            onclick="answerFood(
+                                '${escapeJS(
+                                    notification.id
+                                )}',
+                                'Yes'
+                            )"
+                        >
+                            ${t.yes}
+                        </button>
+
+                        <button
+                            class="answerButton"
+                            onclick="answerFood(
+                                '${escapeJS(
+                                    notification.id
+                                )}',
+                                'No'
+                            )"
+                        >
+                            ${t.no}
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        class="foodAnswerArea"
+                        id="foodArea-${escapeHTML(
+                            notification.id
+                        )}"
+                    >
+
+                        <input
+                            type="text"
+                            id="foodInput-${escapeHTML(
+                                notification.id
+                            )}"
+                            placeholder="${t.whatDidYouEat}"
+                            maxlength="200"
+                        >
+
+                        <button
+                            class="submitFoodButton"
+                            onclick="submitFood(
+                                '${escapeJS(
+                                    notification.id
+                                )}'
+                            )"
+                        >
+                            ${t.submit}
+                        </button>
+
+                    </div>
+
+                `;
+
+            }
+
+
+            /* =========================
+               LANDON ANSWER RESULT
+            ========================= */
+
+            if (
+                currentUser.username ===
+                    "landon" &&
+                notification.answer
+            ) {
+
+                if (
+                    notification.answer ===
+                    "Yes"
+                ) {
+
+                    message +=
+                        "<br><br><strong>" +
+                        "You ate: " +
+                        escapeHTML(
+                            notification.food ||
+                            ""
+                        ) +
+                        "</strong>";
+
+                } else {
+
+                    message +=
+                        "<br><br><strong>" +
+                        "You did not eat yet." +
+                        "</strong>";
+
+                }
+
+            }
+
+
+            return `
+
+                <div
+                    class="notification ${
+                        read
+                            ? ""
+                            : "unread"
+                    }"
+                >
+
+                    <div
+                        class="notificationTop"
+                    >
+
+                        <div>
+
+                            <div
+                                class="notificationTitle"
+                            >
+                                ${escapeHTML(
+                                    title
+                                )}
+                            </div>
+
+                            <div
+                                class="notificationSender"
+                            >
+                                ${escapeHTML(
+                                    sender
+                                )}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="notificationMessage"
+                    >
+                        ${message}
+                    </div>
+
+
+                    <div
+                        class="notificationTime"
+                    >
+                        ${date.toLocaleString()}
+                    </div>
+
+
+                    ${actions}
+
+
+                    ${
+                        !read
+                            ? `
+                                <div
+                                    class="notificationActions"
+                                >
+
+                                    <button
+                                        class="readButton"
+                                        onclick="markNotificationRead(
+                                            '${escapeJS(
+                                                notification.id
+                                            )}'
+                                        )"
+                                    >
+                                        Mark as read
+                                    </button>
+
+                                </div>
+                            `
+                            : ""
+                    }
+
+                </div>
+
+            `;
+
+        }
+
+
+        /* =========================
+           FOOD ANSWERS
+        ========================= */
+
+        async function answerFood(
+            notificationId,
+            answer
+        ) {
+
+            if (
+                answer === "Yes"
+            ) {
+
+                const area =
+                    document.getElementById(
+                        "foodArea-" +
+                        notificationId
+                    );
+
+                if (area) {
+
+                    area.style.display =
+                        "block";
+
+                }
+
+                const input =
+                    document.getElementById(
+                        "foodInput-" +
+                        notificationId
+                    );
+
+                if (input) {
+
+                    input.focus();
+
+                }
+
+                return;
+
+            }
+
+
+            await saveAnswer(
+                notificationId,
+                "No",
+                null
+            );
+
+        }
+
+
+        async function submitFood(
+            notificationId
+        ) {
+
+            const input =
+                document.getElementById(
+                    "foodInput-" +
+                    notificationId
+                );
+
+            if (!input) {
+                return;
+            }
+
+            const food =
+                input.value.trim();
+
+            if (!food) {
+
+                input.focus();
+
+                return;
+
+            }
+
+            await saveAnswer(
+                notificationId,
+                "Yes",
+                food
+            );
+
+        }
+
+
+        async function saveAnswer(
+            notificationId,
+            answer,
+            food
+        ) {
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/answer",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+
+                                username:
+                                    currentUser.username,
+
+                                notificationId,
+
+                                answer,
+
+                                food
+
+                            })
+
+                        }
+                    );
+
+                const data =
+                    await response.json();
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error ||
+                        "Failed to save answer"
+                    );
+
+                }
+
+                await loadNotifications();
+
+            } catch (error) {
+
+                console.error(
+                    "Answer error:",
+                    error
+                );
+
+                alert(
+                    "Could not save your answer. Please try again."
+                );
+
+            }
+
+        }
+
+
+        /* =========================
+           INBOX
+        ========================= */
+
+        function openInbox() {
+
+            loadNotifications();
+
+            document.getElementById(
+                "inboxModal"
+            ).style.display =
+                "flex";
+
+        }
+
+
+        function closeInbox() {
+
+            document.getElementById(
+                "inboxModal"
+            ).style.display =
+                "none";
+
+        }
+
+
+        /* =========================
+           AI ASSISTANT
+        ========================= */
+
+        function openAI() {
+
+            document.getElementById(
+                "aiModal"
+            ).style.display =
+                "flex";
+
+            document.getElementById(
+                "chatInput"
+            ).focus();
+
+            renderChat();
+
+        }
+
+
+        function closeAI() {
+
+            document.getElementById(
+                "aiModal"
+            ).style.display =
+                "none";
+
+        }
+
+
+        function renderChat() {
+
+            const container =
+                document.getElementById(
+                    "chatMessages"
+                );
+
+            if (
+                chatMessages.length ===
+                0
+            ) {
+
+                container.innerHTML = `
+
+                    <div
+                        class="chatMessage assistant"
+                    >
+
+                        <div>
+
+                            <div
+                                class="chatName"
+                            >
+                                AI Assistant
+                            </div>
+
+                            <div
+                                class="chatBubble"
+                            >
+                                Hi! I'm your AI Assistant. Ask me anything.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+                return;
+
+            }
+
+
+            container.innerHTML =
+                chatMessages
+                    .map(
+                        message => {
+
+                            const isUser =
+                                message.role ===
+                                "user";
+
+                            return `
+
+                                <div
+                                    class="chatMessage ${
+                                        isUser
+                                            ? "user"
+                                            : "assistant"
+                                    }"
+                                >
+
+                                    <div>
+
+                                        ${
+                                            !isUser
+                                                ? `
+                                                    <div
+                                                        class="chatName"
+                                                    >
+                                                        AI Assistant
+                                                    </div>
+                                                `
+                                                : ""
+                                        }
+
+                                        <div
+                                            class="chatBubble"
+                                        >
+                                            ${escapeHTML(
+                                                message.content
+                                            )}
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            `;
+
+                        }
+                    )
+                    .join("");
+
+            container.scrollTop =
+                container.scrollHeight;
+
+        }
+
+
+        async function sendMessage() {
+
+            const input =
+                document.getElementById(
+                    "chatInput"
+                );
+
+            const sendButton =
+                document.getElementById(
+                    "sendButton"
+                );
+
+            const typing =
+                document.getElementById(
+                    "typingIndicator"
+                );
+
+            const message =
+                input.value.trim();
+
+            if (!message) {
+                return;
+            }
+
+            chatMessages.push({
+
+                role:
+                    "user",
+
+                content:
+                    message
+
+            });
+
+            input.value =
+                "";
+
+            renderChat();
+
+            sendButton.disabled =
+                true;
+
+            typing.style.display =
+                "block";
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/chat",
+                        {
+
+                            method:
+                                "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify({
+                                    messages:
+                                        chatMessages
+                                })
+
+                        }
+                    );
+
+                const data =
+                    await response.json();
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error ||
+                        "AI request failed."
+                    );
+
+                }
+
+                chatMessages.push({
+
+                    role:
+                        "assistant",
+
+                    content:
+                        data.reply ||
+                        "I couldn't generate a response."
+
+                });
+
+            } catch (error) {
+
+                console.error(
+                    error
+                );
+
+                chatMessages.push({
+
+                    role:
+                        "assistant",
+
+                    content:
+                        "Sorry, something went wrong while contacting the AI."
+
+                });
+
+            } finally {
+
+                typing.style.display =
+                    "none";
+
+                sendButton.disabled =
+                    false;
+
+                renderChat();
+
+                input.focus();
+
+            }
+
+        }
+
+
+        /* =========================
+           ENTER TO SEND
+        ========================= */
+
+        document.getElementById(
+            "chatInput"
+        ).addEventListener(
+            "keydown",
+            function(event) {
+
+                if (
+                    event.key ===
+                        "Enter" &&
+                    !event.shiftKey
+                ) {
+
+                    event.preventDefault();
+
+                    sendMessage();
+
+                }
+
+            }
+        );
+
+
+        /* =========================
+           MODAL CLOSE
+        ========================= */
+
+        function closeModalIfBackground(
+            event,
+            modalId
+        ) {
+
+            if (
+                event.target.id ===
+                modalId
+            ) {
+
+                document.getElementById(
+                    modalId
+                ).style.display =
+                    "none";
+
+            }
+
+        }
+
+
+        /* =========================
+           HTML SAFETY
+        ========================= */
+
+        function escapeHTML(text) {
+
+            return String(text)
+
+                .replace(
+                    /&/g,
+                    "&amp;"
+                )
+
+                .replace(
+                    /</g,
+                    "&lt;"
+                )
+
+                .replace(
+                    />/g,
+                    "&gt;"
+                )
+
+                .replace(
+                    /"/g,
+                    "&quot;"
+                )
+
+                .replace(
+                    /'/g,
+                    "&#039;"
+                );
+
+        }
+
+
+        function escapeJS(text) {
+
+            return String(text)
+
+                .replace(
+                    /\\/g,
+                    "\\\\"
+                )
+
+                .replace(
+                    /'/g,
+                    "\\'"
+                );
+
+        }
+
+
+        /* =========================
+           AUTOMATIC SYNC
+        ========================= */
+
+        setInterval(
+            () => {
+
+                if (!currentUser) {
+                    return;
+                }
+
+                loadNotifications();
+
+            },
+            15000
+        );
+
+
+        /* =========================
+           START APPLICATION
+        ========================= */
+
+        function startApplication() {
+
+            runLoadingScreen(
+                () => {
+
+                    const savedUser =
+                        localStorage.getItem(
+                            "loggedInUser"
+                        );
+
+                    if (
+                        savedUser &&
+                        accounts[
+                            savedUser
+                        ]
+                    ) {
+
+                        currentUser = {
+
+                            username:
+                                savedUser,
+
+                            displayName:
+                                accounts[
+                                    savedUser
+                                ].displayName
+
+                        };
+
+                        runLoadingScreen(
+                            () => {
+
+                                showDashboard();
+
+                            }
+                        );
+
+                    } else {
+
+                        document.getElementById(
+                            "loginPage"
+                        ).style.display =
+                            "flex";
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        startApplication();
+
+    </script>
+
+</body>
+</html>
 ```
