@@ -1133,15 +1133,11 @@
                 send: "Send",
                 placeholder: "Ask me anything...",
                 thinking: "AI is thinking...",
-                welcome: "Welcome to your new inbox.",
-                systemWelcome: "Welcome!",
                 empty: "No notifications yet.",
                 yes: "Yes",
                 no: "No",
                 whatDidYouEat: "What did you eat?",
-                submit: "Submit",
-                saving: "Saving...",
-                answered: "Answer saved."
+                submit: "Submit"
             },
 
             id: {
@@ -1156,15 +1152,11 @@
                 send: "Kirim",
                 placeholder: "Tanyakan apa saja...",
                 thinking: "AI sedang berpikir...",
-                welcome: "Selamat datang di kotak masuk baru kamu.",
-                systemWelcome: "Selamat datang!",
                 empty: "Belum ada notifikasi.",
                 yes: "Ya",
                 no: "Tidak",
                 whatDidYouEat: "Apa yang kamu makan?",
-                submit: "Kirim",
-                saving: "Menyimpan...",
-                answered: "Jawaban tersimpan."
+                submit: "Kirim"
             },
 
             es: {
@@ -1179,15 +1171,11 @@
                 send: "Enviar",
                 placeholder: "Pregúntame lo que quieras...",
                 thinking: "La IA está pensando...",
-                welcome: "Bienvenido a tu nueva bandeja.",
-                systemWelcome: "¡Bienvenido!",
                 empty: "No hay notificaciones.",
                 yes: "Sí",
                 no: "No",
                 whatDidYouEat: "¿Qué comiste?",
-                submit: "Enviar",
-                saving: "Guardando...",
-                answered: "Respuesta guardada."
+                submit: "Enviar"
             },
 
             fr: {
@@ -1202,15 +1190,11 @@
                 send: "Envoyer",
                 placeholder: "Demandez-moi n'importe quoi...",
                 thinking: "L'IA réfléchit...",
-                welcome: "Bienvenue dans votre nouvelle boîte de réception.",
-                systemWelcome: "Bienvenue !",
                 empty: "Aucune notification.",
                 yes: "Oui",
                 no: "Non",
                 whatDidYouEat: "Qu'avez-vous mangé ?",
-                submit: "Envoyer",
-                saving: "Enregistrement...",
-                answered: "Réponse enregistrée."
+                submit: "Envoyer"
             },
 
             de: {
@@ -1225,15 +1209,11 @@
                 send: "Senden",
                 placeholder: "Frag mich alles...",
                 thinking: "Die KI denkt nach...",
-                welcome: "Willkommen in deinem neuen Posteingang.",
-                systemWelcome: "Willkommen!",
                 empty: "Noch keine Benachrichtigungen.",
                 yes: "Ja",
                 no: "Nein",
                 whatDidYouEat: "Was hast du gegessen?",
-                submit: "Senden",
-                saving: "Speichern...",
-                answered: "Antwort gespeichert."
+                submit: "Senden"
             },
 
             zh: {
@@ -1248,15 +1228,11 @@
                 send: "发送",
                 placeholder: "问我任何问题...",
                 thinking: "AI 正在思考...",
-                welcome: "欢迎来到你的新收件箱。",
-                systemWelcome: "欢迎！",
                 empty: "暂无通知。",
                 yes: "是",
                 no: "否",
                 whatDidYouEat: "你吃了什么？",
-                submit: "提交",
-                saving: "保存中...",
-                answered: "答案已保存。"
+                submit: "提交"
             },
 
             ja: {
@@ -1271,15 +1247,11 @@
                 send: "送信",
                 placeholder: "何でも聞いてください...",
                 thinking: "AIが考えています...",
-                welcome: "新しい受信トレイへようこそ。",
-                systemWelcome: "ようこそ！",
                 empty: "通知はありません。",
                 yes: "はい",
                 no: "いいえ",
                 whatDidYouEat: "何を食べましたか？",
-                submit: "送信",
-                saving: "保存中...",
-                answered: "回答を保存しました。"
+                submit: "送信"
             },
 
             ko: {
@@ -1294,15 +1266,11 @@
                 send: "보내기",
                 placeholder: "무엇이든 물어보세요...",
                 thinking: "AI가 생각하고 있습니다...",
-                welcome: "새 받은 편지함에 오신 것을 환영합니다.",
-                systemWelcome: "환영합니다.",
                 empty: "알림이 없습니다.",
                 yes: "예",
                 no: "아니요",
                 whatDidYouEat: "무엇을 먹었나요?",
-                submit: "제출",
-                saving: "저장 중...",
-                answered: "답변이 저장되었습니다."
+                submit: "제출"
             }
         };
 
@@ -1509,6 +1477,11 @@
                 return;
             }
 
+            /*
+             * ONLY SYSTEM GETS
+             * THE SYSTEM TESTER.
+             */
+
             if (
                 currentUser.username ===
                 "system"
@@ -1520,12 +1493,46 @@
                 button.innerHTML = `
                     <span class="buttonIcon">🧪</span>
 
-                    <span class="buttonTitle">
+                    <span
+                        class="buttonTitle"
+                        id="aiButtonText"
+                    >
                         System Tester
                     </span>
 
-                    <span class="buttonSub">
+                    <span
+                        class="buttonSub"
+                        id="aiSubText"
+                    >
                         Test notifications
+                    </span>
+                `;
+
+            } else {
+
+                /*
+                 * Landon and Mama always
+                 * get the normal AI button.
+                 */
+
+                button.onclick =
+                    openAI;
+
+                button.innerHTML = `
+                    <span class="buttonIcon">🤖</span>
+
+                    <span
+                        class="buttonTitle"
+                        id="aiButtonText"
+                    >
+                        AI Assistant
+                    </span>
+
+                    <span
+                        class="buttonSub"
+                        id="aiSubText"
+                    >
+                        Ask me anything
                     </span>
                 `;
 
@@ -1598,20 +1605,50 @@
             ).textContent = t.inboxSub;
 
             document.getElementById(
-                "aiButtonText"
-            ).textContent = t.ai;
-
-            document.getElementById(
-                "aiSubText"
-            ).textContent = t.aiSub;
-
-            document.querySelector(
-                ".logoutButton"
-            ).textContent = t.logout;
+                "logoutButton"
+            ) &&
+            (
+                document.querySelector(
+                    ".logoutButton"
+                ).textContent = t.logout
+            );
 
             document.getElementById(
                 "inboxTitle"
             ).textContent = t.inboxTitle;
+
+            /*
+             * System keeps System Tester.
+             * Landon and Mama keep AI Assistant.
+             */
+
+            if (
+                currentUser &&
+                currentUser.username ===
+                "system"
+            ) {
+
+                document.getElementById(
+                    "aiButtonText"
+                ).textContent =
+                    "System Tester";
+
+                document.getElementById(
+                    "aiSubText"
+                ).textContent =
+                    "Test notifications";
+
+            } else {
+
+                document.getElementById(
+                    "aiButtonText"
+                ).textContent = t.ai;
+
+                document.getElementById(
+                    "aiSubText"
+                ).textContent = t.aiSub;
+
+            }
 
             document.getElementById(
                 "aiTitle"
@@ -1712,16 +1749,20 @@
                     await response.json();
 
                 if (!response.ok) {
+
                     throw new Error(
                         data.error ||
                         "Failed to load notifications"
                     );
+
                 }
 
                 sharedNotifications =
-                    Array.isArray(data.notifications)
-                        ? data.notifications
-                        : [];
+                    Array.isArray(
+                        data.notifications
+                    )
+                    ? data.notifications
+                    : [];
 
                 renderNotifications();
 
@@ -1752,7 +1793,9 @@
         function isRead(id) {
 
             return getReadNotifications()
-                .includes(String(id));
+                .includes(
+                    String(id)
+                );
         }
 
 
@@ -1764,8 +1807,12 @@
             const stringId =
                 String(id);
 
-            if (!read.includes(stringId)) {
+            if (
+                !read.includes(stringId)
+            ) {
+
                 read.push(stringId);
+
             }
 
             localStorage.setItem(
@@ -1782,13 +1829,19 @@
 
         function updateUnreadCount() {
 
+            if (!currentUser) {
+                return;
+            }
+
             const notifications =
                 getVisibleNotifications();
 
             const unread =
                 notifications.filter(
                     notification =>
-                        !isRead(notification.id)
+                        !isRead(
+                            notification.id
+                        )
                 ).length;
 
             const badge =
@@ -1803,11 +1856,13 @@
                         ? "99+"
                         : unread;
 
-                badge.style.display = "flex";
+                badge.style.display =
+                    "flex";
 
             } else {
 
-                badge.style.display = "none";
+                badge.style.display =
+                    "none";
 
             }
         }
@@ -1823,12 +1878,17 @@
                 Date.now();
 
             const lifetime =
-                24 * 60 * 60 * 1000;
+                24 *
+                60 *
+                60 *
+                1000;
 
             return sharedNotifications
                 .filter(notification => {
 
-                    if (!notification.createdAt) {
+                    if (
+                        !notification.createdAt
+                    ) {
                         return false;
                     }
 
@@ -1838,9 +1898,17 @@
                             notification.createdAt
                         ).getTime();
 
-                    if (age > lifetime) {
+                    if (
+                        age > lifetime
+                    ) {
                         return false;
                     }
+
+                    /*
+                     * LANDON:
+                     * Only sees notifications
+                     * meant for Landon.
+                     */
 
                     if (
                         currentUser.username ===
@@ -1854,6 +1922,12 @@
 
                     }
 
+                    /*
+                     * MAMA:
+                     * Sees her own reminders AND
+                     * Landon's food notifications.
+                     */
+
                     if (
                         currentUser.username ===
                         "mama"
@@ -1862,11 +1936,20 @@
                         return (
                             notification.recipient ===
                                 "mama" ||
-                            notification.recipient ===
-                                "landon"
+                            (
+                                notification.recipient ===
+                                "landon" &&
+                                notification.type ===
+                                "food"
+                            )
                         );
 
                     }
+
+                    /*
+                     * SYSTEM:
+                     * Can see everything for testing.
+                     */
 
                     if (
                         currentUser.username ===
@@ -1890,19 +1973,27 @@
                     "notifications"
                 );
 
-            if (!container) return;
+            if (!container) {
+                return;
+            }
 
             const notifications =
                 getVisibleNotifications();
 
-            if (notifications.length === 0) {
+            if (
+                notifications.length === 0
+            ) {
 
                 const language =
                     getLanguage();
 
                 container.innerHTML = `
                     <div class="emptyState">
-                        ${translations[language].empty}
+                        ${
+                            translations[
+                                language
+                            ].empty
+                        }
                     </div>
                 `;
 
@@ -1913,16 +2004,19 @@
                 notifications
                     .sort(
                         (a, b) =>
-                            new Date(b.createdAt) -
-                            new Date(a.createdAt)
+                            new Date(
+                                b.createdAt
+                            ) -
+                            new Date(
+                                a.createdAt
+                            )
                     )
-                    .map(notification => {
-
-                        return renderNotification(
-                            notification
-                        );
-
-                    })
+                    .map(
+                        notification =>
+                            renderNotification(
+                                notification
+                            )
+                    )
                     .join("");
 
             updateUnreadCount();
@@ -1939,7 +2033,9 @@
                 );
 
             const read =
-                isRead(notification.id);
+                isRead(
+                    notification.id
+                );
 
             const language =
                 getLanguage();
@@ -1952,22 +2048,30 @@
                 notification.title;
 
             let message =
-                notification.body || "";
+                notification.body ||
+                "";
 
             let sender =
                 "System";
 
 
-            /*
-             * Mama sees food notifications
-             * as an outgoing message.
-             */
+            /* =========================
+               MAMA VIEW
+            ========================= */
 
             if (
-                currentUser.username === "mama" &&
-                notification.recipient === "landon" &&
-                notification.type === "food"
+                currentUser.username ===
+                    "mama" &&
+                notification.type ===
+                    "food" &&
+                notification.recipient ===
+                    "landon"
             ) {
+
+                /*
+                 * Mama sees the outgoing
+                 * notification.
+                 */
 
                 title =
                     notification.mamaTitle ||
@@ -1977,52 +2081,85 @@
                     notification.mamaBody ||
                     "";
 
-                sender = "Mama";
+                sender =
+                    "Mama";
 
-                if (notification.answer) {
 
-                    if (
-                        notification.answer ===
-                        "Yes"
-                    ) {
+                /*
+                 * Once Landon answers,
+                 * Mama receives his answer.
+                 */
 
-                        message +=
-                            "<br><br><strong>" +
-                            "Landon ate: " +
-                            escapeHTML(
-                                notification.food ||
-                                "Food"
-                            ) +
-                            "</strong>";
+                if (
+                    notification.answer ===
+                    "Yes"
+                ) {
 
-                    } else {
+                    message +=
+                        "<br><br><strong>" +
+                        "Landon ate: " +
+                        escapeHTML(
+                            notification.food ||
+                            ""
+                        ) +
+                        "</strong>";
 
-                        message +=
-                            "<br><br><strong>" +
-                            "Landon did not eat yet" +
-                            "</strong>";
+                } else if (
+                    notification.answer ===
+                    "No"
+                ) {
 
-                    }
+                    message +=
+                        "<br><br><strong>" +
+                        "Landon did not eat yet." +
+                        "</strong>";
 
                 }
 
-            } else if (
-                currentUser.username === "landon"
+            }
+
+
+            /* =========================
+               LANDON VIEW
+            ========================= */
+
+            else if (
+                currentUser.username ===
+                "landon"
             ) {
 
-                sender = "Mama";
+                sender =
+                    "Mama";
 
-            } else if (
-                notification.recipient === "mama"
+            }
+
+
+            /* =========================
+               MAMA REMINDER
+            ========================= */
+
+            else if (
+                notification.recipient ===
+                "mama"
             ) {
 
-                sender = "System";
+                sender =
+                    "System";
 
-            } else if (
-                currentUser.username === "system"
+            }
+
+
+            /* =========================
+               SYSTEM VIEW
+            ========================= */
+
+            else if (
+                currentUser.username ===
+                "system"
             ) {
 
-                sender = "System";
+                sender =
+                    "System";
 
             }
 
@@ -2031,13 +2168,14 @@
 
 
             /*
-             * Landon gets Yes / No
-             * on food notifications.
+             * ONLY LANDON gets Yes / No.
              */
 
             if (
-                currentUser.username === "landon" &&
-                notification.type === "food" &&
+                currentUser.username ===
+                    "landon" &&
+                notification.type ===
+                    "food" &&
                 !notification.answer
             ) {
 
@@ -2047,7 +2185,9 @@
                         <button
                             class="answerButton"
                             onclick="answerFood(
-                                '${escapeJS(notification.id)}',
+                                '${escapeJS(
+                                    notification.id
+                                )}',
                                 'Yes'
                             )"
                         >
@@ -2057,7 +2197,9 @@
                         <button
                             class="answerButton"
                             onclick="answerFood(
-                                '${escapeJS(notification.id)}',
+                                '${escapeJS(
+                                    notification.id
+                                )}',
                                 'No'
                             )"
                         >
@@ -2068,11 +2210,16 @@
 
                     <div
                         class="foodAnswerArea"
-                        id="foodArea-${escapeHTML(notification.id)}"
+                        id="foodArea-${escapeHTML(
+                            notification.id
+                        )}"
                     >
+
                         <input
                             type="text"
-                            id="foodInput-${escapeHTML(notification.id)}"
+                            id="foodInput-${escapeHTML(
+                                notification.id
+                            )}"
                             placeholder="${t.whatDidYouEat}"
                             maxlength="200"
                         >
@@ -2080,11 +2227,14 @@
                         <button
                             class="submitFoodButton"
                             onclick="submitFood(
-                                '${escapeJS(notification.id)}'
+                                '${escapeJS(
+                                    notification.id
+                                )}'
                             )"
                         >
                             ${t.submit}
                         </button>
+
                     </div>
                 `;
 
@@ -2092,17 +2242,18 @@
 
 
             /*
-             * Landon sees his own answer
-             * after answering.
+             * Landon sees his saved answer.
              */
 
             if (
-                currentUser.username === "landon" &&
+                currentUser.username ===
+                    "landon" &&
                 notification.answer
             ) {
 
                 if (
-                    notification.answer === "Yes"
+                    notification.answer ===
+                    "Yes"
                 ) {
 
                     message +=
@@ -2118,7 +2269,7 @@
 
                     message +=
                         "<br><br><strong>" +
-                        "You did not eat yet" +
+                        "You did not eat yet." +
                         "</strong>";
 
                 }
@@ -2128,7 +2279,9 @@
 
             return `
                 <div class="notification ${
-                    read ? "" : "unread"
+                    read
+                        ? ""
+                        : "unread"
                 }">
 
                     <div class="notificationTop">
@@ -2136,11 +2289,15 @@
                         <div>
 
                             <div class="notificationTitle">
-                                ${escapeHTML(title)}
+                                ${escapeHTML(
+                                    title
+                                )}
                             </div>
 
                             <div class="notificationSender">
-                                ${escapeHTML(sender)}
+                                ${escapeHTML(
+                                    sender
+                                )}
                             </div>
 
                         </div>
@@ -2159,21 +2316,23 @@
 
                     ${
                         !read
-                        ? `
-                            <div class="notificationActions">
+                            ? `
+                                <div class="notificationActions">
 
-                                <button
-                                    class="readButton"
-                                    onclick="markNotificationRead(
-                                        '${escapeJS(notification.id)}'
-                                    )"
-                                >
-                                    Mark as read
-                                </button>
+                                    <button
+                                        class="readButton"
+                                        onclick="markNotificationRead(
+                                            '${escapeJS(
+                                                notification.id
+                                            )}'
+                                        )"
+                                    >
+                                        Mark as read
+                                    </button>
 
-                            </div>
-                        `
-                        : ""
+                                </div>
+                            `
+                            : ""
                     }
 
                 </div>
@@ -2190,7 +2349,14 @@
             answer
         ) {
 
-            if (answer === "Yes") {
+            /*
+             * Yes opens the food input.
+             */
+
+            if (
+                answer ===
+                "Yes"
+            ) {
 
                 const area =
                     document.getElementById(
@@ -2199,8 +2365,10 @@
                     );
 
                 if (area) {
+
                     area.style.display =
                         "block";
+
                 }
 
                 const input =
@@ -2210,11 +2378,18 @@
                     );
 
                 if (input) {
+
                     input.focus();
+
                 }
 
                 return;
             }
+
+
+            /*
+             * No is saved immediately.
+             */
 
             await saveAnswer(
                 notificationId,
@@ -2234,7 +2409,9 @@
                     notificationId
                 );
 
-            if (!input) return;
+            if (!input) {
+                return;
+            }
 
             const food =
                 input.value.trim();
@@ -2273,18 +2450,19 @@
                                     "application/json"
                             },
 
-                            body: JSON.stringify({
+                            body:
+                                JSON.stringify({
 
-                                username:
-                                    currentUser.username,
+                                    username:
+                                        currentUser.username,
 
-                                notificationId,
+                                    notificationId,
 
-                                answer,
+                                    answer,
 
-                                food
+                                    food
 
-                            })
+                                })
                         }
                     );
 
@@ -2299,6 +2477,11 @@
                     );
 
                 }
+
+                /*
+                 * Reloads the shared data.
+                 * Mama will then see the answer.
+                 */
 
                 await loadNotifications();
 
@@ -2326,7 +2509,8 @@
 
             document.getElementById(
                 "inboxModal"
-            ).style.display = "flex";
+            ).style.display =
+                "flex";
         }
 
 
@@ -2334,7 +2518,8 @@
 
             document.getElementById(
                 "inboxModal"
-            ).style.display = "none";
+            ).style.display =
+                "none";
         }
 
 
@@ -2344,14 +2529,28 @@
 
         function openSystemTester() {
 
+            /*
+             * Extra protection:
+             * only the System account
+             * can open the tester.
+             */
+
+            if (
+                !currentUser ||
+                currentUser.username !==
+                    "system"
+            ) {
+                return;
+            }
+
             document.getElementById(
                 "systemModal"
-            ).style.display = "flex";
+            ).style.display =
+                "flex";
 
             document.getElementById(
                 "systemTestStatus"
             ).textContent = "";
-
         }
 
 
@@ -2359,12 +2558,28 @@
 
             document.getElementById(
                 "systemModal"
-            ).style.display = "none";
-
+            ).style.display =
+                "none";
         }
 
 
-        async function runSystemTest(type) {
+        async function runSystemTest(
+            type
+        ) {
+
+            /*
+             * Extra protection:
+             * only System can trigger tests.
+             */
+
+            if (
+                !currentUser ||
+                currentUser.username !==
+                    "system"
+            ) {
+
+                return;
+            }
 
             const status =
                 document.getElementById(
@@ -2372,9 +2587,16 @@
                 );
 
             const names = {
-                breakfast: "Breakfast",
-                lunch: "Lunch",
-                dinner: "Dinner"
+
+                breakfast:
+                    "Breakfast",
+
+                lunch:
+                    "Lunch",
+
+                dinner:
+                    "Dinner"
+
             };
 
             status.textContent =
@@ -2387,7 +2609,9 @@
                 const response =
                     await fetch(
                         "/api/notifications?test=" +
-                        encodeURIComponent(type)
+                        encodeURIComponent(
+                            type
+                        )
                     );
 
                 const data =
@@ -2418,9 +2642,7 @@
                 status.textContent =
                     "Test failed: " +
                     error.message;
-
             }
-
         }
 
 
@@ -2430,9 +2652,22 @@
 
         function openAI() {
 
+            /*
+             * System does not get AI.
+             */
+
+            if (
+                currentUser &&
+                currentUser.username ===
+                    "system"
+            ) {
+                return;
+            }
+
             document.getElementById(
                 "aiModal"
-            ).style.display = "flex";
+            ).style.display =
+                "flex";
 
             document.getElementById(
                 "chatInput"
@@ -2446,7 +2681,8 @@
 
             document.getElementById(
                 "aiModal"
-            ).style.display = "none";
+            ).style.display =
+                "none";
         }
 
 
@@ -2457,7 +2693,10 @@
                     "chatMessages"
                 );
 
-            if (chatMessages.length === 0) {
+            if (
+                chatMessages.length ===
+                0
+            ) {
 
                 container.innerHTML = `
                     <div class="chatMessage assistant">
@@ -2482,45 +2721,47 @@
 
             container.innerHTML =
                 chatMessages
-                    .map(message => {
+                    .map(
+                        message => {
 
-                        const isUser =
-                            message.role ===
-                            "user";
+                            const isUser =
+                                message.role ===
+                                "user";
 
-                        return `
-                            <div
-                                class="chatMessage ${
-                                    isUser
-                                        ? "user"
-                                        : "assistant"
-                                }"
-                            >
+                            return `
+                                <div
+                                    class="chatMessage ${
+                                        isUser
+                                            ? "user"
+                                            : "assistant"
+                                    }"
+                                >
 
-                                <div>
+                                    <div>
 
-                                    ${
-                                        !isUser
-                                        ? `
-                                            <div class="chatName">
-                                                AI Assistant
-                                            </div>
-                                        `
-                                        : ""
-                                    }
+                                        ${
+                                            !isUser
+                                                ? `
+                                                    <div class="chatName">
+                                                        AI Assistant
+                                                    </div>
+                                                `
+                                                : ""
+                                        }
 
-                                    <div class="chatBubble">
-                                        ${escapeHTML(
-                                            message.content
-                                        )}
+                                        <div class="chatBubble">
+                                            ${escapeHTML(
+                                                message.content
+                                            )}
+                                        </div>
+
                                     </div>
 
                                 </div>
+                            `;
 
-                            </div>
-                        `;
-
-                    })
+                        }
+                    )
                     .join("");
 
             container.scrollTop =
@@ -2548,18 +2789,24 @@
             const message =
                 input.value.trim();
 
-            if (!message) return;
+            if (!message) {
+                return;
+            }
 
             chatMessages.push({
+
                 role: "user",
+
                 content: message
+
             });
 
             input.value = "";
 
             renderChat();
 
-            sendButton.disabled = true;
+            sendButton.disabled =
+                true;
 
             typing.style.display =
                 "block";
@@ -2577,10 +2824,11 @@
                                     "application/json"
                             },
 
-                            body: JSON.stringify({
-                                messages:
-                                    chatMessages
-                            })
+                            body:
+                                JSON.stringify({
+                                    messages:
+                                        chatMessages
+                                })
                         }
                     );
 
@@ -2597,7 +2845,8 @@
 
                 chatMessages.push({
 
-                    role: "assistant",
+                    role:
+                        "assistant",
 
                     content:
                         data.reply ||
@@ -2607,11 +2856,14 @@
 
             } catch (error) {
 
-                console.error(error);
+                console.error(
+                    error
+                );
 
                 chatMessages.push({
 
-                    role: "assistant",
+                    role:
+                        "assistant",
 
                     content:
                         "Sorry, something went wrong while contacting the AI."
@@ -2651,6 +2903,7 @@
                     event.preventDefault();
 
                     sendMessage();
+
                 }
 
             }
@@ -2673,7 +2926,8 @@
 
                 document.getElementById(
                     modalId
-                ).style.display = "none";
+                ).style.display =
+                    "none";
             }
         }
 
@@ -2685,22 +2939,27 @@
         function escapeHTML(text) {
 
             return String(text)
+
                 .replace(
                     /&/g,
                     "&amp;"
                 )
+
                 .replace(
                     /</g,
                     "&lt;"
                 )
+
                 .replace(
                     />/g,
                     "&gt;"
                 )
+
                 .replace(
                     /"/g,
                     "&quot;"
                 )
+
                 .replace(
                     /'/g,
                     "&#039;"
@@ -2711,10 +2970,12 @@
         function escapeJS(text) {
 
             return String(text)
+
                 .replace(
                     /\\/g,
                     "\\\\"
                 )
+
                 .replace(
                     /'/g,
                     "\\'"
@@ -2728,7 +2989,9 @@
 
         setInterval(() => {
 
-            if (!currentUser) return;
+            if (!currentUser) {
+                return;
+            }
 
             loadNotifications();
 
