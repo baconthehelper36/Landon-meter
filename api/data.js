@@ -12,7 +12,11 @@ module.exports = async (req, res) => {
     try {
         const username = req.query.username;
 
-        if (username !== "landon" && username !== "mama") {
+        if (
+            username !== "landon" &&
+            username !== "mama" &&
+            username !== "system"
+        ) {
             return res.status(400).json({
                 error: "Invalid username"
             });
