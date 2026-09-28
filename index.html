@@ -23,7 +23,8 @@
 
         button,
         input,
-        select {
+        select,
+        textarea {
             font-family: inherit;
         }
 
@@ -409,9 +410,14 @@
 
         .notificationActions {
             margin-top: 13px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
-        .readButton {
+        .readButton,
+        .answerButton,
+        .submitFoodButton {
             background: #202c40;
             border: none;
             color: white;
@@ -419,6 +425,46 @@
             border-radius: 8px;
             cursor: pointer;
             font-size: 12px;
+        }
+
+        .answerButton {
+            min-width: 70px;
+            background: #263b58;
+        }
+
+        .answerButton:hover,
+        .readButton:hover,
+        .submitFoodButton:hover {
+            background: #345477;
+        }
+
+        .foodAnswerArea {
+            margin-top: 14px;
+            display: none;
+        }
+
+        .foodAnswerArea input {
+            width: 100%;
+            padding: 11px 12px;
+            background: #0c1019;
+            border: 1px solid #29344a;
+            border-radius: 9px;
+            color: white;
+            outline: none;
+        }
+
+        .foodAnswerArea input:focus {
+            border-color: #61a8ff;
+        }
+
+        .foodAnswerArea button {
+            margin-top: 8px;
+        }
+
+        .answerStatus {
+            margin-top: 13px;
+            color: #9eabc0;
+            font-size: 13px;
         }
 
         .emptyState {
@@ -565,10 +611,6 @@
 
 <body>
 
-    <!-- =========================
-         LOADING SCREEN
-    ========================= -->
-
     <div id="loadingScreen">
         <div class="loadingBox">
             <div class="loadingTitle">PERSONAL</div>
@@ -586,10 +628,6 @@
     </div>
 
 
-    <!-- =========================
-         LOGIN
-    ========================= -->
-
     <div id="loginPage">
 
         <div class="loginCard">
@@ -600,6 +638,7 @@
 
             <div class="inputGroup">
                 <label>Username</label>
+
                 <input
                     type="text"
                     id="username"
@@ -610,6 +649,7 @@
 
             <div class="inputGroup">
                 <label>Password</label>
+
                 <input
                     type="password"
                     id="password"
@@ -630,10 +670,6 @@
 
     </div>
 
-
-    <!-- =========================
-         DASHBOARD
-    ========================= -->
 
     <div id="dashboard">
 
@@ -680,8 +716,6 @@
 
                 <div class="dashboardButtons">
 
-                    <!-- INBOX -->
-
                     <div style="position: relative;">
 
                         <button
@@ -690,11 +724,17 @@
                         >
                             <span class="buttonIcon">📨</span>
 
-                            <span class="buttonTitle" id="inboxButtonText">
+                            <span
+                                class="buttonTitle"
+                                id="inboxButtonText"
+                            >
                                 Inbox
                             </span>
 
-                            <span class="buttonSub" id="inboxSubText">
+                            <span
+                                class="buttonSub"
+                                id="inboxSubText"
+                            >
                                 Your notifications
                             </span>
                         </button>
@@ -709,19 +749,23 @@
                     </div>
 
 
-                    <!-- AI ASSISTANT -->
-
                     <button
                         class="dashboardButton"
                         onclick="openAI()"
                     >
                         <span class="buttonIcon">🤖</span>
 
-                        <span class="buttonTitle" id="aiButtonText">
+                        <span
+                            class="buttonTitle"
+                            id="aiButtonText"
+                        >
                             AI Assistant
                         </span>
 
-                        <span class="buttonSub" id="aiSubText">
+                        <span
+                            class="buttonSub"
+                            id="aiSubText"
+                        >
                             Ask me anything
                         </span>
                     </button>
@@ -734,10 +778,6 @@
 
     </div>
 
-
-    <!-- =========================
-         INBOX MODAL
-    ========================= -->
 
     <div
         class="modalOverlay"
@@ -771,10 +811,6 @@
 
     </div>
 
-
-    <!-- =========================
-         AI MODAL
-    ========================= -->
 
     <div
         class="modalOverlay"
@@ -858,6 +894,132 @@
 
         let chatMessages = [];
 
+        let sharedNotifications = [];
+
+
+        /* =========================
+           PUSH NOTIFICATIONS
+        ========================= */
+
+        const VAPID_PUBLIC_KEY =
+            "BHpapDcdOL1jssjCsGOaz7QbRFS_LihJPCvvZdKfobckvd_t-AkxgQ4YhS7QGg-Qm8ktWcgTgyl2i1iE_tQMOkk";
+
+
+        function urlBase64ToUint8Array(base64String) {
+
+            const padding =
+                "=".repeat(
+                    (4 - base64String.length % 4) % 4
+                );
+
+            const base64 =
+                (base64String + padding)
+                    .replace(/-/g, "+")
+                    .replace(/_/g, "/");
+
+            const rawData =
+                window.atob(base64);
+
+            return Uint8Array.from(
+                [...rawData].map(
+                    char => char.charCodeAt(0)
+                )
+            );
+        }
+
+
+        async function setupPushNotifications() {
+
+            if (
+                !("serviceWorker" in navigator) ||
+                !("PushManager" in window) ||
+                !("Notification" in window)
+            ) {
+                console.log(
+                    "Push notifications are not supported."
+                );
+
+                return;
+            }
+
+            try {
+
+                const registration =
+                    await navigator.serviceWorker.register(
+                        "/sw.js"
+                    );
+
+                let permission =
+                    Notification.permission;
+
+                if (permission === "default") {
+
+                    permission =
+                        await Notification.requestPermission();
+
+                }
+
+                if (permission !== "granted") {
+
+                    console.log(
+                        "Notification permission was not granted."
+                    );
+
+                    return;
+                }
+
+                let subscription =
+                    await registration.pushManager.getSubscription();
+
+                if (!subscription) {
+
+                    subscription =
+                        await registration.pushManager.subscribe({
+
+                            userVisibleOnly: true,
+
+                            applicationServerKey:
+                                urlBase64ToUint8Array(
+                                    VAPID_PUBLIC_KEY
+                                )
+
+                        });
+
+                }
+
+                await fetch("/api/subscribe", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        username:
+                            currentUser.username,
+
+                        subscription
+
+                    })
+
+                });
+
+                console.log(
+                    "Push notifications connected."
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Push setup error:",
+                    error
+                );
+
+            }
+        }
+
 
         /* =========================
            TRANSLATIONS
@@ -879,7 +1041,13 @@
                 thinking: "AI is thinking...",
                 welcome: "Welcome to your new inbox.",
                 systemWelcome: "Welcome!",
-                empty: "No notifications yet."
+                empty: "No notifications yet.",
+                yes: "Yes",
+                no: "No",
+                whatDidYouEat: "What did you eat?",
+                submit: "Submit",
+                saving: "Saving...",
+                answered: "Answer saved."
             },
 
             id: {
@@ -896,7 +1064,13 @@
                 thinking: "AI sedang berpikir...",
                 welcome: "Selamat datang di kotak masuk baru kamu.",
                 systemWelcome: "Selamat datang!",
-                empty: "Belum ada notifikasi."
+                empty: "Belum ada notifikasi.",
+                yes: "Ya",
+                no: "Tidak",
+                whatDidYouEat: "Apa yang kamu makan?",
+                submit: "Kirim",
+                saving: "Menyimpan...",
+                answered: "Jawaban tersimpan."
             },
 
             es: {
@@ -913,7 +1087,13 @@
                 thinking: "La IA está pensando...",
                 welcome: "Bienvenido a tu nueva bandeja.",
                 systemWelcome: "¡Bienvenido!",
-                empty: "No hay notificaciones."
+                empty: "No hay notificaciones.",
+                yes: "Sí",
+                no: "No",
+                whatDidYouEat: "¿Qué comiste?",
+                submit: "Enviar",
+                saving: "Guardando...",
+                answered: "Respuesta guardada."
             },
 
             fr: {
@@ -930,7 +1110,13 @@
                 thinking: "L'IA réfléchit...",
                 welcome: "Bienvenue dans votre nouvelle boîte de réception.",
                 systemWelcome: "Bienvenue !",
-                empty: "Aucune notification."
+                empty: "Aucune notification.",
+                yes: "Oui",
+                no: "Non",
+                whatDidYouEat: "Qu'avez-vous mangé ?",
+                submit: "Envoyer",
+                saving: "Enregistrement...",
+                answered: "Réponse enregistrée."
             },
 
             de: {
@@ -947,7 +1133,13 @@
                 thinking: "Die KI denkt nach...",
                 welcome: "Willkommen in deinem neuen Posteingang.",
                 systemWelcome: "Willkommen!",
-                empty: "Noch keine Benachrichtigungen."
+                empty: "Noch keine Benachrichtigungen.",
+                yes: "Ja",
+                no: "Nein",
+                whatDidYouEat: "Was hast du gegessen?",
+                submit: "Senden",
+                saving: "Speichern...",
+                answered: "Antwort gespeichert."
             },
 
             zh: {
@@ -964,7 +1156,13 @@
                 thinking: "AI 正在思考...",
                 welcome: "欢迎来到你的新收件箱。",
                 systemWelcome: "欢迎！",
-                empty: "暂无通知。"
+                empty: "暂无通知。",
+                yes: "是",
+                no: "否",
+                whatDidYouEat: "你吃了什么？",
+                submit: "提交",
+                saving: "保存中...",
+                answered: "答案已保存。"
             },
 
             ja: {
@@ -981,7 +1179,13 @@
                 thinking: "AIが考えています...",
                 welcome: "新しい受信トレイへようこそ。",
                 systemWelcome: "ようこそ！",
-                empty: "通知はありません。"
+                empty: "通知はありません。",
+                yes: "はい",
+                no: "いいえ",
+                whatDidYouEat: "何を食べましたか？",
+                submit: "送信",
+                saving: "保存中...",
+                answered: "回答を保存しました。"
             },
 
             ko: {
@@ -998,7 +1202,13 @@
                 thinking: "AI가 생각하고 있습니다...",
                 welcome: "새 받은 편지함에 오신 것을 환영합니다.",
                 systemWelcome: "환영합니다!",
-                empty: "알림이 없습니다."
+                empty: "알림이 없습니다.",
+                yes: "예",
+                no: "아니요",
+                whatDidYouEat: "무엇을 먹었나요?",
+                submit: "제출",
+                saving: "저장 중...",
+                answered: "답변이 저장되었습니다."
             }
         };
 
@@ -1034,7 +1244,8 @@
 
                 progress += 5;
 
-                progressBar.style.width = progress + "%";
+                progressBar.style.width =
+                    progress + "%";
 
                 const index =
                     Math.min(
@@ -1042,7 +1253,8 @@
                         messages.length - 1
                     );
 
-                loadingText.textContent = messages[index];
+                loadingText.textContent =
+                    messages[index];
 
                 if (progress >= 100) {
 
@@ -1054,7 +1266,8 @@
 
                         setTimeout(() => {
 
-                            loadingScreen.style.display = "none";
+                            loadingScreen.style.display =
+                                "none";
 
                             if (callback) {
                                 callback();
@@ -1075,7 +1288,8 @@
 
         function getGreeting(name) {
 
-            const hour = new Date().getHours();
+            const hour =
+                new Date().getHours();
 
             if (hour >= 5 && hour < 12) {
                 return "Good morning " + name;
@@ -1100,12 +1314,14 @@
         function login() {
 
             const username =
-                document.getElementById("username").value
-                .trim()
-                .toLowerCase();
+                document.getElementById("username")
+                    .value
+                    .trim()
+                    .toLowerCase();
 
             const password =
-                document.getElementById("password").value;
+                document.getElementById("password")
+                    .value;
 
             const error =
                 document.getElementById("loginError");
@@ -1117,7 +1333,8 @@
 
                 currentUser = {
                     username,
-                    displayName: accounts[username].displayName
+                    displayName:
+                        accounts[username].displayName
                 };
 
                 localStorage.setItem(
@@ -1127,8 +1344,9 @@
 
                 error.style.display = "none";
 
-                document.getElementById("loginPage").style.display =
-                    "none";
+                document.getElementById(
+                    "loginPage"
+                ).style.display = "none";
 
                 runLoadingScreen(() => {
 
@@ -1150,8 +1368,9 @@
 
         function showDashboard() {
 
-            document.getElementById("dashboard").style.display =
-                "block";
+            document.getElementById(
+                "dashboard"
+            ).style.display = "block";
 
             updateGreeting();
 
@@ -1159,7 +1378,9 @@
 
             createSystemNotification();
 
-            updateUnreadCount();
+            loadNotifications();
+
+            setupPushNotifications();
 
         }
 
@@ -1168,8 +1389,12 @@
 
             if (!currentUser) return;
 
-            document.getElementById("greeting").textContent =
-                getGreeting(currentUser.displayName);
+            document.getElementById(
+                "greeting"
+            ).textContent =
+                getGreeting(
+                    currentUser.displayName
+                );
         }
 
 
@@ -1188,7 +1413,9 @@
         function changeLanguage() {
 
             const language =
-                document.getElementById("languageSelect").value;
+                document.getElementById(
+                    "languageSelect"
+                ).value;
 
             localStorage.setItem(
                 "selectedLanguage",
@@ -1196,62 +1423,75 @@
             );
 
             updateLanguage();
-
         }
 
 
         function loadLanguage() {
 
             const select =
-                document.getElementById("languageSelect");
+                document.getElementById(
+                    "languageSelect"
+                );
 
-            select.value = getLanguage();
+            select.value =
+                getLanguage();
 
             updateLanguage();
-
         }
 
 
         function updateLanguage() {
 
-            const language = getLanguage();
+            const language =
+                getLanguage();
 
             const t =
                 translations[language] ||
                 translations.en;
 
-            document.getElementById("dashboardTitle")
-                .textContent = t.dashboard;
+            document.getElementById(
+                "dashboardTitle"
+            ).textContent = t.dashboard;
 
-            document.getElementById("inboxButtonText")
-                .textContent = t.inbox;
+            document.getElementById(
+                "inboxButtonText"
+            ).textContent = t.inbox;
 
-            document.getElementById("inboxSubText")
-                .textContent = t.inboxSub;
+            document.getElementById(
+                "inboxSubText"
+            ).textContent = t.inboxSub;
 
-            document.getElementById("aiButtonText")
-                .textContent = t.ai;
+            document.getElementById(
+                "aiButtonText"
+            ).textContent = t.ai;
 
-            document.getElementById("aiSubText")
-                .textContent = t.aiSub;
+            document.getElementById(
+                "aiSubText"
+            ).textContent = t.aiSub;
 
-            document.querySelector(".logoutButton")
-                .textContent = t.logout;
+            document.querySelector(
+                ".logoutButton"
+            ).textContent = t.logout;
 
-            document.getElementById("inboxTitle")
-                .textContent = t.inboxTitle;
+            document.getElementById(
+                "inboxTitle"
+            ).textContent = t.inboxTitle;
 
-            document.getElementById("aiTitle")
-                .textContent = t.aiTitle;
+            document.getElementById(
+                "aiTitle"
+            ).textContent = t.aiTitle;
 
-            document.getElementById("sendButton")
-                .textContent = t.send;
+            document.getElementById(
+                "sendButton"
+            ).textContent = t.send;
 
-            document.getElementById("chatInput")
-                .placeholder = t.placeholder;
+            document.getElementById(
+                "chatInput"
+            ).placeholder = t.placeholder;
 
-            document.getElementById("typingIndicator")
-                .textContent = t.thinking;
+            document.getElementById(
+                "typingIndicator"
+            ).textContent = t.thinking;
 
             renderNotifications();
         }
@@ -1263,123 +1503,169 @@
 
         function logout() {
 
-            localStorage.removeItem("loggedInUser");
+            localStorage.removeItem(
+                "loggedInUser"
+            );
 
             currentUser = null;
 
-            document.getElementById("dashboard").style.display =
-                "none";
+            document.getElementById(
+                "dashboard"
+            ).style.display = "none";
 
-            document.getElementById("loginPage").style.display =
-                "none";
+            document.getElementById(
+                "loginPage"
+            ).style.display = "none";
 
             runLoadingScreen(() => {
 
-                document.getElementById("loginPage").style.display =
-                    "flex";
+                document.getElementById(
+                    "loginPage"
+                ).style.display = "flex";
 
-                document.getElementById("username").value = "";
-                document.getElementById("password").value = "";
+                document.getElementById(
+                    "username"
+                ).value = "";
+
+                document.getElementById(
+                    "password"
+                ).value = "";
 
             });
         }
 
 
         /* =========================
-           NOTIFICATIONS
+           SHARED NOTIFICATIONS
         ========================= */
-
-        const NOTIFICATION_LIFETIME =
-            24 * 60 * 60 * 1000;
-
-
-        function getNotifications() {
-
-            let notifications =
-                JSON.parse(
-                    localStorage.getItem("notifications") || "[]"
-                );
-
-            const now = Date.now();
-
-            notifications = notifications.filter(notification => {
-
-                if (!notification.createdAt) {
-                    notification.createdAt = now;
-                }
-
-                return (
-                    now - notification.createdAt
-                    < NOTIFICATION_LIFETIME
-                );
-
-            });
-
-            localStorage.setItem(
-                "notifications",
-                JSON.stringify(notifications)
-            );
-
-            return notifications;
-        }
-
 
         function createSystemNotification() {
 
-            const notifications =
-                getNotifications();
+            const key =
+                "systemWelcomeShown:" +
+                currentUser.username;
 
-            const alreadyExists =
-                notifications.some(
-                    notification =>
-                        notification.sender === "System" &&
-                        notification.title === "Welcome!"
-                );
-
-            if (!alreadyExists) {
-
-                notifications.push({
-
-                    id: Date.now(),
-
-                    sender: "System",
-
-                    title: "Welcome!",
-
-                    message:
-                        "Welcome to your new inbox.",
-
-                    createdAt: Date.now(),
-
-                    read: false
-
-                });
-
-                localStorage.setItem(
-                    "notifications",
-                    JSON.stringify(notifications)
-                );
+            if (
+                localStorage.getItem(key)
+            ) {
+                return;
             }
+
+            localStorage.setItem(
+                key,
+                "true"
+            );
+        }
+
+
+        async function loadNotifications() {
+
+            if (!currentUser) return;
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/data?username=" +
+                        encodeURIComponent(
+                            currentUser.username
+                        )
+                    );
+
+                const data =
+                    await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.error ||
+                        "Failed to load notifications"
+                    );
+                }
+
+                sharedNotifications =
+                    Array.isArray(data.notifications)
+                        ? data.notifications
+                        : [];
+
+                renderNotifications();
+
+                updateUnreadCount();
+
+            } catch (error) {
+
+                console.error(
+                    "Notification loading error:",
+                    error
+                );
+
+            }
+        }
+
+
+        function getReadNotifications() {
+
+            return JSON.parse(
+                localStorage.getItem(
+                    "readNotifications:" +
+                    currentUser.username
+                ) || "[]"
+            );
+        }
+
+
+        function isRead(id) {
+
+            return getReadNotifications()
+                .includes(String(id));
+        }
+
+
+        function markNotificationRead(id) {
+
+            const read =
+                getReadNotifications();
+
+            const stringId =
+                String(id);
+
+            if (!read.includes(stringId)) {
+                read.push(stringId);
+            }
+
+            localStorage.setItem(
+                "readNotifications:" +
+                currentUser.username,
+                JSON.stringify(read)
+            );
+
+            renderNotifications();
+
+            updateUnreadCount();
         }
 
 
         function updateUnreadCount() {
 
             const notifications =
-                getNotifications();
+                getVisibleNotifications();
 
             const unread =
                 notifications.filter(
-                    notification => !notification.read
+                    notification =>
+                        !isRead(notification.id)
                 ).length;
 
             const badge =
-                document.getElementById("unreadBadge");
+                document.getElementById(
+                    "unreadBadge"
+                );
 
             if (unread > 0) {
 
                 badge.textContent =
-                    unread > 99 ? "99+" : unread;
+                    unread > 99
+                        ? "99+"
+                        : unread;
 
                 badge.style.display = "flex";
 
@@ -1391,19 +1677,83 @@
         }
 
 
+        function getVisibleNotifications() {
+
+            if (!currentUser) {
+                return [];
+            }
+
+            const now =
+                Date.now();
+
+            const lifetime =
+                24 * 60 * 60 * 1000;
+
+            return sharedNotifications
+                .filter(notification => {
+
+                    if (!notification.createdAt) {
+                        return false;
+                    }
+
+                    const age =
+                        now -
+                        new Date(
+                            notification.createdAt
+                        ).getTime();
+
+                    if (age > lifetime) {
+                        return false;
+                    }
+
+                    if (
+                        currentUser.username ===
+                        "landon"
+                    ) {
+
+                        return (
+                            notification.recipient ===
+                            "landon"
+                        );
+
+                    }
+
+                    if (
+                        currentUser.username ===
+                        "mama"
+                    ) {
+
+                        return (
+                            notification.recipient ===
+                                "mama" ||
+                            notification.recipient ===
+                                "landon"
+                        );
+
+                    }
+
+                    return false;
+
+                });
+        }
+
+
         function renderNotifications() {
 
             const container =
-                document.getElementById("notifications");
+                document.getElementById(
+                    "notifications"
+                );
 
             if (!container) return;
 
             const notifications =
-                getNotifications();
+                getVisibleNotifications();
 
             if (notifications.length === 0) {
 
-                const language = getLanguage();
+                const language =
+                    getLanguage();
 
                 container.innerHTML = `
                     <div class="emptyState">
@@ -1416,106 +1766,416 @@
 
             container.innerHTML =
                 notifications
-                .sort(
-                    (a, b) =>
-                        b.createdAt - a.createdAt
-                )
-                .map(notification => {
+                    .sort(
+                        (a, b) =>
+                            new Date(b.createdAt) -
+                            new Date(a.createdAt)
+                    )
+                    .map(notification => {
 
-                    const date =
-                        new Date(
-                            notification.createdAt
+                        return renderNotification(
+                            notification
                         );
 
-                    return `
-                        <div class="notification ${notification.read ? "" : "unread"}">
-
-                            <div class="notificationTop">
-
-                                <div>
-                                    <div class="notificationTitle">
-                                        ${escapeHTML(notification.title)}
-                                    </div>
-
-                                    <div class="notificationSender">
-                                        ${escapeHTML(notification.sender)}
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <div class="notificationMessage">
-                                ${escapeHTML(notification.message)}
-                            </div>
-
-                            <div class="notificationTime">
-                                ${date.toLocaleString()}
-                            </div>
-
-                            ${
-                                !notification.read
-                                ? `
-                                    <div class="notificationActions">
-                                        <button
-                                            class="readButton"
-                                            onclick="markNotificationRead(${notification.id})"
-                                        >
-                                            Mark as read
-                                        </button>
-                                    </div>
-                                `
-                                : ""
-                            }
-
-                        </div>
-                    `;
-
-                })
-                .join("");
-
-        }
-
-
-        function markNotificationRead(id) {
-
-            const notifications =
-                getNotifications();
-
-            const notification =
-                notifications.find(
-                    item => item.id === id
-                );
-
-            if (notification) {
-                notification.read = true;
-            }
-
-            localStorage.setItem(
-                "notifications",
-                JSON.stringify(notifications)
-            );
-
-            renderNotifications();
+                    })
+                    .join("");
 
             updateUnreadCount();
         }
 
 
+        function renderNotification(
+            notification
+        ) {
+
+            const date =
+                new Date(
+                    notification.createdAt
+                );
+
+            const read =
+                isRead(notification.id);
+
+            const language =
+                getLanguage();
+
+            const t =
+                translations[language] ||
+                translations.en;
+
+            let title =
+                notification.title;
+
+            let message =
+                notification.body || "";
+
+            let sender =
+                "System";
+
+            /*
+             * Mama sees food notifications
+             * as an outgoing message.
+             */
+
+            if (
+                currentUser.username === "mama" &&
+                notification.recipient === "landon" &&
+                notification.type === "food"
+            ) {
+
+                title =
+                    notification.mamaTitle ||
+                    "Send Notification to Landon";
+
+                message =
+                    notification.mamaBody ||
+                    "";
+
+                sender = "Mama";
+
+                if (notification.answer) {
+
+                    if (
+                        notification.answer ===
+                        "Yes"
+                    ) {
+
+                        message +=
+                            "<br><br><strong>" +
+                            "Landon ate: " +
+                            escapeHTML(
+                                notification.food ||
+                                "Food"
+                            ) +
+                            "</strong>";
+
+                    } else {
+
+                        message +=
+                            "<br><br><strong>" +
+                            "Landon did not eat yet" +
+                            "</strong>";
+
+                    }
+
+                }
+
+            } else if (
+                currentUser.username === "landon"
+            ) {
+
+                sender = "Mama";
+
+            } else if (
+                notification.recipient === "mama"
+            ) {
+
+                sender = "System";
+
+            }
+
+            let actions = "";
+
+            /*
+             * Landon gets Yes / No
+             * on food notifications.
+             */
+
+            if (
+                currentUser.username === "landon" &&
+                notification.type === "food" &&
+                !notification.answer
+            ) {
+
+                actions = `
+                    <div class="notificationActions">
+
+                        <button
+                            class="answerButton"
+                            onclick="answerFood(
+                                '${escapeJS(notification.id)}',
+                                'Yes'
+                            )"
+                        >
+                            ${t.yes}
+                        </button>
+
+                        <button
+                            class="answerButton"
+                            onclick="answerFood(
+                                '${escapeJS(notification.id)}',
+                                'No'
+                            )"
+                        >
+                            ${t.no}
+                        </button>
+
+                    </div>
+
+                    <div
+                        class="foodAnswerArea"
+                        id="foodArea-${escapeHTML(notification.id)}"
+                    >
+                        <input
+                            type="text"
+                            id="foodInput-${escapeHTML(notification.id)}"
+                            placeholder="${t.whatDidYouEat}"
+                            maxlength="200"
+                        >
+
+                        <button
+                            class="submitFoodButton"
+                            onclick="submitFood(
+                                '${escapeJS(notification.id)}'
+                            )"
+                        >
+                            ${t.submit}
+                        </button>
+                    </div>
+                `;
+
+            }
+
+            /*
+             * Landon sees his own answer
+             * after answering.
+             */
+
+            if (
+                currentUser.username === "landon" &&
+                notification.answer
+            ) {
+
+                if (
+                    notification.answer === "Yes"
+                ) {
+
+                    message +=
+                        "<br><br><strong>" +
+                        "You ate: " +
+                        escapeHTML(
+                            notification.food ||
+                            ""
+                        ) +
+                        "</strong>";
+
+                } else {
+
+                    message +=
+                        "<br><br><strong>" +
+                        "You did not eat yet" +
+                        "</strong>";
+
+                }
+
+            }
+
+            /*
+             * Mama's reminder does not
+             * have Yes / No.
+             */
+
+            return `
+                <div class="notification ${
+                    read ? "" : "unread"
+                }">
+
+                    <div class="notificationTop">
+
+                        <div>
+
+                            <div class="notificationTitle">
+                                ${escapeHTML(title)}
+                            </div>
+
+                            <div class="notificationSender">
+                                ${escapeHTML(sender)}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="notificationMessage">
+                        ${message}
+                    </div>
+
+                    <div class="notificationTime">
+                        ${date.toLocaleString()}
+                    </div>
+
+                    ${actions}
+
+                    ${
+                        !read
+                        ? `
+                            <div class="notificationActions">
+
+                                <button
+                                    class="readButton"
+                                    onclick="markNotificationRead(
+                                        '${escapeJS(notification.id)}'
+                                    )"
+                                >
+                                    Mark as read
+                                </button>
+
+                            </div>
+                        `
+                        : ""
+                    }
+
+                </div>
+            `;
+        }
+
+
+        async function answerFood(
+            notificationId,
+            answer
+        ) {
+
+            if (answer === "Yes") {
+
+                const area =
+                    document.getElementById(
+                        "foodArea-" +
+                        notificationId
+                    );
+
+                if (area) {
+                    area.style.display =
+                        "block";
+                }
+
+                const input =
+                    document.getElementById(
+                        "foodInput-" +
+                        notificationId
+                    );
+
+                if (input) {
+                    input.focus();
+                }
+
+                return;
+            }
+
+            await saveAnswer(
+                notificationId,
+                "No",
+                null
+            );
+        }
+
+
+        async function submitFood(
+            notificationId
+        ) {
+
+            const input =
+                document.getElementById(
+                    "foodInput-" +
+                    notificationId
+                );
+
+            if (!input) return;
+
+            const food =
+                input.value.trim();
+
+            if (!food) {
+
+                input.focus();
+
+                return;
+            }
+
+            await saveAnswer(
+                notificationId,
+                "Yes",
+                food
+            );
+        }
+
+
+        async function saveAnswer(
+            notificationId,
+            answer,
+            food
+        ) {
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/answer",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+
+                                username:
+                                    currentUser.username,
+
+                                notificationId,
+
+                                answer,
+
+                                food
+
+                            })
+                        }
+                    );
+
+                const data =
+                    await response.json();
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error ||
+                        "Failed to save answer"
+                    );
+
+                }
+
+                await loadNotifications();
+
+            } catch (error) {
+
+                console.error(
+                    "Answer error:",
+                    error
+                );
+
+                alert(
+                    "Could not save your answer. Please try again."
+                );
+            }
+        }
+
+
         function openInbox() {
 
-            renderNotifications();
+            loadNotifications();
 
-            document.getElementById("inboxModal")
-                .style.display = "flex";
-
+            document.getElementById(
+                "inboxModal"
+            ).style.display = "flex";
         }
 
 
         function closeInbox() {
 
-            document.getElementById("inboxModal")
-                .style.display = "none";
-
+            document.getElementById(
+                "inboxModal"
+            ).style.display = "none";
         }
 
 
@@ -1525,35 +2185,40 @@
 
         function openAI() {
 
-            document.getElementById("aiModal")
-                .style.display = "flex";
+            document.getElementById(
+                "aiModal"
+            ).style.display = "flex";
 
-            document.getElementById("chatInput")
-                .focus();
+            document.getElementById(
+                "chatInput"
+            ).focus();
 
             renderChat();
-
         }
 
 
         function closeAI() {
 
-            document.getElementById("aiModal")
-                .style.display = "none";
-
+            document.getElementById(
+                "aiModal"
+            ).style.display = "none";
         }
 
 
         function renderChat() {
 
             const container =
-                document.getElementById("chatMessages");
+                document.getElementById(
+                    "chatMessages"
+                );
 
             if (chatMessages.length === 0) {
 
                 container.innerHTML = `
                     <div class="chatMessage assistant">
+
                         <div>
+
                             <div class="chatName">
                                 AI Assistant
                             </div>
@@ -1561,7 +2226,9 @@
                             <div class="chatBubble">
                                 Hi! I'm your AI Assistant. Ask me anything.
                             </div>
+
                         </div>
+
                     </div>
                 `;
 
@@ -1570,37 +2237,46 @@
 
             container.innerHTML =
                 chatMessages
-                .map(message => {
+                    .map(message => {
 
-                    const isUser =
-                        message.role === "user";
+                        const isUser =
+                            message.role ===
+                            "user";
 
-                    return `
-                        <div class="chatMessage ${isUser ? "user" : "assistant"}">
+                        return `
+                            <div
+                                class="chatMessage ${
+                                    isUser
+                                        ? "user"
+                                        : "assistant"
+                                }"
+                            >
 
-                            <div>
+                                <div>
 
-                                ${
-                                    !isUser
-                                    ? `
-                                        <div class="chatName">
-                                            AI Assistant
-                                        </div>
-                                    `
-                                    : ""
-                                }
+                                    ${
+                                        !isUser
+                                        ? `
+                                            <div class="chatName">
+                                                AI Assistant
+                                            </div>
+                                        `
+                                        : ""
+                                    }
 
-                                <div class="chatBubble">
-                                    ${escapeHTML(message.content)}
+                                    <div class="chatBubble">
+                                        ${escapeHTML(
+                                            message.content
+                                        )}
+                                    </div>
+
                                 </div>
 
                             </div>
+                        `;
 
-                        </div>
-                    `;
-
-                })
-                .join("");
+                    })
+                    .join("");
 
             container.scrollTop =
                 container.scrollHeight;
@@ -1610,13 +2286,19 @@
         async function sendMessage() {
 
             const input =
-                document.getElementById("chatInput");
+                document.getElementById(
+                    "chatInput"
+                );
 
             const sendButton =
-                document.getElementById("sendButton");
+                document.getElementById(
+                    "sendButton"
+                );
 
             const typing =
-                document.getElementById("typingIndicator");
+                document.getElementById(
+                    "typingIndicator"
+                );
 
             const message =
                 input.value.trim();
@@ -1634,29 +2316,34 @@
 
             sendButton.disabled = true;
 
-            typing.style.display = "block";
+            typing.style.display =
+                "block";
 
             try {
 
                 const response =
-                    await fetch("/api/chat", {
+                    await fetch(
+                        "/api/chat",
+                        {
+                            method: "POST",
 
-                        method: "POST",
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
 
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-
-                        body: JSON.stringify({
-                            messages: chatMessages
-                        })
-
-                    });
+                            body: JSON.stringify({
+                                messages:
+                                    chatMessages
+                            })
+                        }
+                    );
 
                 const data =
                     await response.json();
 
                 if (!response.ok) {
+
                     throw new Error(
                         data.error ||
                         "AI request failed."
@@ -1688,14 +2375,15 @@
 
             } finally {
 
-                typing.style.display = "none";
+                typing.style.display =
+                    "none";
 
-                sendButton.disabled = false;
+                sendButton.disabled =
+                    false;
 
                 renderChat();
 
                 input.focus();
-
             }
         }
 
@@ -1704,8 +2392,11 @@
            ENTER TO SEND
         ========================= */
 
-        document.getElementById("chatInput")
-            .addEventListener("keydown", function(event) {
+        document.getElementById(
+            "chatInput"
+        ).addEventListener(
+            "keydown",
+            function(event) {
 
                 if (
                     event.key === "Enter" &&
@@ -1715,10 +2406,10 @@
                     event.preventDefault();
 
                     sendMessage();
-
                 }
 
-            });
+            }
+        );
 
 
         /* =========================
@@ -1731,12 +2422,13 @@
         ) {
 
             if (
-                event.target.id === modalId
+                event.target.id ===
+                modalId
             ) {
 
-                document.getElementById(modalId)
-                    .style.display = "none";
-
+                document.getElementById(
+                    modalId
+                ).style.display = "none";
             }
         }
 
@@ -1748,13 +2440,54 @@
         function escapeHTML(text) {
 
             return String(text)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-
+                .replace(
+                    /&/g,
+                    "&amp;"
+                )
+                .replace(
+                    /</g,
+                    "&lt;"
+                )
+                .replace(
+                    />/g,
+                    "&gt;"
+                )
+                .replace(
+                    /"/g,
+                    "&quot;"
+                )
+                .replace(
+                    /'/g,
+                    "&#039;"
+                );
         }
+
+
+        function escapeJS(text) {
+
+            return String(text)
+                .replace(
+                    /\\/g,
+                    "\\\\"
+                )
+                .replace(
+                    /'/g,
+                    "\\'"
+                );
+        }
+
+
+        /* =========================
+           AUTOMATIC SYNC
+        ========================= */
+
+        setInterval(() => {
+
+            if (!currentUser) return;
+
+            loadNotifications();
+
+        }, 15000);
 
 
         /* =========================
@@ -1777,11 +2510,13 @@
 
                     currentUser = {
 
-                        username: savedUser,
+                        username:
+                            savedUser,
 
                         displayName:
-                            accounts[savedUser]
-                            .displayName
+                            accounts[
+                                savedUser
+                            ].displayName
 
                     };
 
@@ -1795,12 +2530,11 @@
 
                     document.getElementById(
                         "loginPage"
-                    ).style.display = "flex";
-
+                    ).style.display =
+                        "flex";
                 }
 
             });
-
         }
 
 
