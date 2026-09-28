@@ -1,12 +1,7 @@
-const webpush = require("web-push");
 const { Redis } = require("@upstash/redis");
+const webpush = require("web-push");
 
 const redis = Redis.fromEnv();
-
-
-/* =========================
-   VAPID CONFIGURATION
-========================= */
 
 webpush.setVapidDetails(
     "https://example.com",
@@ -16,7 +11,7 @@ webpush.setVapidDetails(
 
 
 /* =========================
-   SEND PUSH TO USER
+   SEND PUSH NOTIFICATION
 ========================= */
 
 async function sendPush(
@@ -24,49 +19,99 @@ async function sendPush(
     notification
 ) {
 
-    const subscriptions =
-        await redis.get(
-            `push:${username}`
-        ) || [];
+    try {
+
+        const key =
+            `push:${username}`;
+
+        const stored =
+            await redis.get(key);
+
+        const subscriptions =
+            Array.isArray(stored)
+                ? stored
+                : [];
+
+        const payload =
+            JSON.stringify({
+
+                title:
+                    notification.title,
+
+                body:
+                    notification.body,
+
+                tag:
+                    notification.id,
+
+                url:
+                    "/"
+
+            });
 
 
-    for (
-        const subscription
-        of subscriptions
-    ) {
+        const remaining = [];
 
-        try {
 
-            await webpush.sendNotification(
-                subscription,
+        for (
+            const subscription
+            of subscriptions
+        ) {
 
-                JSON.stringify({
+            try {
 
-                    title:
-                        notification.title,
+                await webpush.sendNotification(
+                    subscription,
+                    payload
+                );
 
-                    body:
-                        notification.body,
+                remaining.push(
+                    subscription
+                );
 
-                    tag:
-                        notification.id,
+            }
 
-                    url:
-                        "/"
+            catch (error) {
 
-                })
-            );
+                console.error(
+                    "Push error:",
+                    error
+                );
 
-        } catch (error) {
 
-            console.error(
-                "Push error for " +
-                username +
-                ":",
-                error.message
-            );
+                /*
+                 * Remove expired subscriptions.
+                 */
+
+                if (
+                    error.statusCode !== 404 &&
+                    error.statusCode !== 410
+                ) {
+
+                    remaining.push(
+                        subscription
+                    );
+
+                }
+
+            }
 
         }
+
+
+        await redis.set(
+            key,
+            remaining
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Send push error:",
+            error
+        );
 
     }
 
@@ -82,11 +127,11 @@ module.exports = async (
     res
 ) => {
 
-    if (req.method !== "POST") {
+    if (
+        req.method !== "POST"
+    ) {
 
-        return res.status(
-            405
-        ).json({
+        return res.status(405).json({
 
             error:
                 "Method not allowed"
@@ -102,22 +147,54 @@ module.exports = async (
             username,
             notificationId,
             answer,
-            food,
-            action
+            food
         } = req.body;
 
 
+        /* =========================
+           VALIDATION
+        ========================= */
+
         if (
             !username ||
-            !notificationId
+            !notificationId ||
+            !answer
         ) {
 
-            return res.status(
-                400
-            ).json({
+            return res.status(400).json({
 
                 error:
                     "Missing required information"
+
+            });
+
+        }
+
+
+        if (
+            username !== "mama" &&
+            username !== "landon"
+        ) {
+
+            return res.status(403).json({
+
+                error:
+                    "Only Mama and Landon can answer food notifications"
+
+            });
+
+        }
+
+
+        if (
+            answer !== "Yes" &&
+            answer !== "No"
+        ) {
+
+            return res.status(400).json({
+
+                error:
+                    "Answer must be Yes or No"
 
             });
 
@@ -136,7 +213,7 @@ module.exports = async (
             );
 
 
-        let foundIndex =
+        let notificationIndex =
             -1;
 
         let notification =
@@ -161,11 +238,11 @@ module.exports = async (
                 try {
 
                     item =
-                        JSON.parse(
-                            item
-                        );
+                        JSON.parse(item);
 
-                } catch {
+                }
+
+                catch {
 
                     continue;
 
@@ -175,11 +252,11 @@ module.exports = async (
 
 
             if (
-                item.id ===
-                notificationId
+                String(item.id) ===
+                String(notificationId)
             ) {
 
-                foundIndex =
+                notificationIndex =
                     i;
 
                 notification =
@@ -193,16 +270,55 @@ module.exports = async (
 
 
         if (
-            foundIndex === -1 ||
+            notificationIndex ===
+            -1 ||
             !notification
         ) {
 
-            return res.status(
-                404
-            ).json({
+            return res.status(404).json({
 
                 error:
                     "Notification not found"
+
+            });
+
+        }
+
+
+        /* =========================
+           FOOD NOTIFICATION ONLY
+        ========================= */
+
+        if (
+            notification.type !==
+            "food"
+        ) {
+
+            return res.status(400).json({
+
+                error:
+                    "This notification cannot be answered"
+
+            });
+
+        }
+
+
+        /*
+         * The person answering must be
+         * the person the notification was
+         * actually sent to.
+         */
+
+        if (
+            notification.recipient !==
+            username
+        ) {
+
+            return res.status(403).json({
+
+                error:
+                    "This notification is not assigned to you"
 
             });
 
@@ -214,50 +330,39 @@ module.exports = async (
         ========================= */
 
         if (
-            username === "mama"
+            username ===
+            "mama"
         ) {
 
+
+            /*
+             * Mama should NEVER enter food.
+             */
+
             if (
-                notification.type !==
-                "food"
+                food &&
+                String(food).trim()
             ) {
 
-                return res.status(
-                    400
-                ).json({
+                return res.status(400).json({
 
                     error:
-                        "This notification cannot be answered"
+                        "Mama does not enter the food"
 
                 });
 
             }
 
 
-            if (
-                notification.recipient !==
-                "mama"
-            ) {
-
-                return res.status(
-                    403
-                ).json({
-
-                    error:
-                        "This notification belongs to another user"
-
-                });
-
-            }
-
+            /*
+             * Do not answer twice.
+             */
 
             if (
                 notification.answer
             ) {
 
-                return res.status(
-                    400
-                ).json({
+                return res.status(400).json({
 
                     error:
                         "This notification has already been answered"
@@ -267,44 +372,22 @@ module.exports = async (
             }
 
 
-            if (
-                answer !== "Yes" &&
-                answer !== "No"
-            ) {
-
-                return res.status(
-                    400
-                ).json({
-
-                    error:
-                        "Answer must be Yes or No"
-
-                });
-
-            }
-
-
-            const answeredAt =
-                new Date().toISOString();
-
-
-            /*
-             * Save Mama's answer.
-             */
-
             notification.answer =
                 answer;
+
+            notification.food =
+                null;
 
             notification.answeredBy =
                 "mama";
 
             notification.answeredAt =
-                answeredAt;
+                new Date().toISOString();
 
 
             await redis.lset(
                 "notifications",
-                foundIndex,
+                notificationIndex,
                 JSON.stringify(
                     notification
                 )
@@ -318,18 +401,19 @@ module.exports = async (
 
 
             /*
-             * MAMA SAID NO
+             * =====================================
+             * MAMA SAYS NO
              *
-             * Nothing is sent to Landon.
+             * NOTHING ELSE HAPPENS.
+             * =====================================
              */
 
             if (
-                answer === "No"
+                answer ===
+                "No"
             ) {
 
-                return res.status(
-                    200
-                ).json({
+                return res.status(200).json({
 
                     success:
                         true,
@@ -337,44 +421,54 @@ module.exports = async (
                     answer:
                         "No",
 
-                    sentToLandon:
-                        false,
+                    nextStep:
+                        "done",
 
-                    message:
-                        "Mama answered No. Nothing was sent to Landon."
+                    landonNotificationCreated:
+                        false
 
                 });
 
             }
 
 
-            /* =========================
-               MAMA SAID YES
-            ========================= */
+            /*
+             * =====================================
+             * MAMA SAYS YES
+             *
+             * CREATE A NEW QUESTION FOR LANDON.
+             * =====================================
+             */
+
+            const meal =
+                notification.meal ||
+                getMealFromNotification(
+                    notification
+                );
 
 
             const landonNotificationId =
                 `${notificationId}-landon`;
 
 
-            const existing =
+            const existingLandon =
                 await redis.get(
                     `notification:${landonNotificationId}`
                 );
 
 
-            /*
-             * Prevent duplicate Landon
-             * notifications.
-             */
+            if (
+                !existingLandon
+            ) {
 
-            if (!existing) {
+                const title =
+                    notification.title ||
+                    `Did Landon Eat ${capitalizeMeal(meal)} Yet?`;
 
-                const meal =
-                    notification.meal ||
-                    getMealFromNotification(
-                        notification
-                    );
+
+                const body =
+                    notification.body ||
+                    `Did Landon Eat ${capitalizeMeal(meal)} Yet?`;
 
 
                 const landonNotification = {
@@ -385,9 +479,6 @@ module.exports = async (
                     type:
                         "food",
 
-                    stage:
-                        "landon",
-
                     recipient:
                         "landon",
 
@@ -395,21 +486,15 @@ module.exports = async (
                         meal,
 
                     title:
-                        "Send Notification",
+                        title,
 
                     body:
-                        notification.body,
+                        body,
 
                     answer:
                         null,
 
                     food:
-                        null,
-
-                    answeredBy:
-                        null,
-
-                    answeredAt:
                         null,
 
                     sourceNotificationId:
@@ -421,22 +506,11 @@ module.exports = async (
                 };
 
 
-                /*
-                 * Save Landon's notification.
-                 */
-
                 await redis.lpush(
                     "notifications",
                     JSON.stringify(
                         landonNotification
                     )
-                );
-
-
-                await redis.ltrim(
-                    "notifications",
-                    0,
-                    99
                 );
 
 
@@ -447,21 +521,18 @@ module.exports = async (
 
 
                 /*
-                 * NOW send it to Landon.
+                 * PUSH THE NEW QUESTION TO LANDON.
                  */
 
                 await sendPush(
                     "landon",
-
                     landonNotification
                 );
 
             }
 
 
-            return res.status(
-                200
-            ).json({
+            return res.status(200).json({
 
                 success:
                     true,
@@ -469,11 +540,11 @@ module.exports = async (
                 answer:
                     "Yes",
 
-                sentToLandon:
-                    true,
+                nextStep:
+                    "landon",
 
-                message:
-                    "Mama answered Yes. Notification sent to Landon."
+                landonNotificationCreated:
+                    true
 
             });
 
@@ -485,95 +556,70 @@ module.exports = async (
         ========================= */
 
         if (
-            username === "landon"
+            username ===
+            "landon"
         ) {
 
-            if (
-                notification.type !==
-                "food"
-            ) {
 
-                return res.status(
-                    400
-                ).json({
-
-                    error:
-                        "This notification cannot be answered"
-
-                });
-
-            }
-
+            /*
+             * Landon has not answered yet.
+             */
 
             if (
-                notification.recipient !==
-                "landon"
+                notification.answer
             ) {
 
-                return res.status(
-                    403
-                ).json({
+                /*
+                 * Allow the final food submission
+                 * only if the existing answer is Yes.
+                 */
 
-                    error:
-                        "This notification belongs to another user"
+                if (
+                    !(
+                        notification.answer ===
+                        "Yes" &&
+                        food &&
+                        String(food).trim()
+                    )
+                ) {
 
-                });
+                    return res.status(400).json({
+
+                        error:
+                            "This notification has already been answered"
+
+                    });
+
+                }
 
             }
 
 
             /* =========================
-               LANDON FOOD SUBMISSION
+               LANDON = NO
             ========================= */
 
             if (
-                action === "food"
+                answer ===
+                "No"
             ) {
 
-                if (
-                    notification.answer !==
-                    "Yes"
-                ) {
-
-                    return res.status(
-                        400
-                    ).json({
-
-                        error:
-                            "Landon must answer Yes before entering food"
-
-                    });
-
-                }
-
-
-                if (
-                    !food ||
-                    !String(food).trim()
-                ) {
-
-                    return res.status(
-                        400
-                    ).json({
-
-                        error:
-                            "Please enter what Landon ate"
-
-                    });
-
-                }
-
+                notification.answer =
+                    "No";
 
                 notification.food =
-                    String(food).trim();
+                    null;
 
-                notification.foodSubmittedAt =
+                notification.answeredBy =
+                    "landon";
+
+                notification.answeredAt =
                     new Date().toISOString();
 
 
                 await redis.lset(
                     "notifications",
-                    foundIndex,
+                    notificationIndex,
                     JSON.stringify(
                         notification
                     )
@@ -586,102 +632,98 @@ module.exports = async (
                 );
 
 
-                return res.status(
-                    200
-                ).json({
+                /*
+                 * =====================================
+                 * TELL MAMA THAT LANDON DID NOT EAT.
+                 * =====================================
+                 */
 
-                    success:
-                        true,
-
-                    action:
-                        "food",
-
-                    food:
-                        notification.food,
-
-                    message:
-                        "Food saved successfully"
-
-                });
-
-            }
+                const mamaResultId =
+                    `${notificationId}-mama-result`;
 
 
-            /* =========================
-               LANDON YES / NO
-            ========================= */
-
-            if (
-                answer !== "Yes" &&
-                answer !== "No"
-            ) {
-
-                return res.status(
-                    400
-                ).json({
-
-                    error:
-                        "Answer must be Yes or No"
-
-                });
-
-            }
+                const existingMamaResult =
+                    await redis.get(
+                        `notification:${mamaResultId}`
+                    );
 
 
-            if (
-                notification.answer
-            ) {
+                if (
+                    !existingMamaResult
+                ) {
 
-                return res.status(
-                    400
-                ).json({
-
-                    error:
-                        "This notification has already been answered"
-
-                });
-
-            }
+                    const meal =
+                        notification.meal ||
+                        getMealFromNotification(
+                            notification
+                        );
 
 
-            notification.answer =
-                answer;
+                    const mamaResult = {
 
-            notification.answeredBy =
-                "landon";
+                        id:
+                            mamaResultId,
 
-            notification.answeredAt =
-                new Date().toISOString();
+                        type:
+                            "foodResult",
+
+                        recipient:
+                            "mama",
+
+                        meal:
+                            meal,
+
+                        title:
+                            `Landon did not eat ${capitalizeMeal(meal)} yet`,
+
+                        body:
+                            `Landon answered No. He did not eat ${capitalizeMeal(meal)} yet.`,
+
+                        answer:
+                            "No",
+
+                        food:
+                            null,
+
+                        answeredBy:
+                            "landon",
+
+                        sourceNotificationId:
+                            notificationId,
+
+                        createdAt:
+                            new Date().toISOString()
+
+                    };
 
 
-            await redis.lset(
-                "notifications",
-                foundIndex,
-                JSON.stringify(
-                    notification
-                )
-            );
+                    await redis.lpush(
+                        "notifications",
+                        JSON.stringify(
+                            mamaResult
+                        )
+                    );
 
 
-            await redis.set(
-                `notification:${notificationId}`,
-                notification
-            );
+                    await redis.set(
+                        `notification:${mamaResultId}`,
+                        mamaResult
+                    );
 
 
-            /*
-             * Landon said NO.
-             *
-             * No food input is needed.
-             */
+                    /*
+                     * PUSH THE RESULT TO MAMA.
+                     */
 
-            if (
-                answer === "No"
-            ) {
+                    await sendPush(
+                        "mama",
+                        mamaResult
+                    );
 
-                return res.status(
-                    200
-                ).json({
+                }
+
+
+                return res.status(200).json({
 
                     success:
                         true,
@@ -689,60 +731,193 @@ module.exports = async (
                     answer:
                         "No",
 
-                    needsFood:
-                        false,
+                    nextStep:
+                        "done",
 
-                    message:
-                        "Landon answered No."
+                    mamaNotificationCreated:
+                        true
 
                 });
 
             }
 
 
-            /*
-             * Landon said YES.
-             *
-             * The frontend should now
-             * show the food input.
-             */
+            /* =========================
+               LANDON = YES
+            ========================= */
 
-            return res.status(
-                200
-            ).json({
+            if (
+                answer ===
+                "Yes"
+            ) {
 
-                success:
-                    true,
+                if (
+                    !food ||
+                    !String(food).trim()
+                ) {
 
-                answer:
-                    "Yes",
+                    return res.status(400).json({
 
-                needsFood:
-                    true,
+                        error:
+                            "Please enter what Landon ate"
 
-                message:
-                    "Landon answered Yes. Ask what he ate."
+                    });
 
-            });
+                }
+
+
+                const cleanedFood =
+                    String(food).trim();
+
+
+                notification.answer =
+                    "Yes";
+
+                notification.food =
+                    cleanedFood;
+
+                notification.answeredBy =
+                    "landon";
+
+                notification.answeredAt =
+                    new Date().toISOString();
+
+
+                await redis.lset(
+                    "notifications",
+                    notificationIndex,
+                    JSON.stringify(
+                        notification
+                    )
+                );
+
+
+                await redis.set(
+                    `notification:${notificationId}`,
+                    notification
+                );
+
+
+                /*
+                 * =====================================
+                 * LANDON FINISHED.
+                 *
+                 * NOW TELL MAMA WHAT HE ATE.
+                 * =====================================
+                 */
+
+                const meal =
+                    notification.meal ||
+                    getMealFromNotification(
+                        notification
+                    );
+
+
+                const mamaResultId =
+                    `${notificationId}-mama-result`;
+
+
+                const existingMamaResult =
+                    await redis.get(
+                        `notification:${mamaResultId}`
+                    );
+
+
+                if (
+                    !existingMamaResult
+                ) {
+
+                    const mamaResult = {
+
+                        id:
+                            mamaResultId,
+
+                        type:
+                            "foodResult",
+
+                        recipient:
+                            "mama",
+
+                        meal:
+                            meal,
+
+                        title:
+                            `Landon ate ${capitalizeMeal(meal)}`,
+
+                        body:
+                            `Landon answered Yes. He ate: ${cleanedFood}`,
+
+                        answer:
+                            "Yes",
+
+                        food:
+                            cleanedFood,
+
+                        answeredBy:
+                            "landon",
+
+                        sourceNotificationId:
+                            notificationId,
+
+                        createdAt:
+                            new Date().toISOString()
+
+                    };
+
+
+                    await redis.lpush(
+                        "notifications",
+                        JSON.stringify(
+                            mamaResult
+                        )
+                    );
+
+
+                    await redis.set(
+                        `notification:${mamaResultId}`,
+                        mamaResult
+                    );
+
+
+                    /*
+                     * PUSH THE FOOD RESULT TO MAMA.
+                     */
+
+                    await sendPush(
+                        "mama",
+                        mamaResult
+                    );
+
+                }
+
+
+                return res.status(200).json({
+
+                    success:
+                        true,
+
+                    answer:
+                        "Yes",
+
+                    food:
+                        cleanedFood,
+
+                    nextStep:
+                        "done",
+
+                    mamaNotificationCreated:
+                        true
+
+                });
+
+            }
 
         }
 
 
-        /* =========================
-           SYSTEM / OTHER USERS
-        ========================= */
+    }
 
-        return res.status(
-            403
-        ).json({
-
-            error:
-                "This account cannot answer food notifications"
-
-        });
-
-
-    } catch (error) {
+    catch (error) {
 
         console.error(
             "Answer error:",
@@ -750,9 +925,7 @@ module.exports = async (
         );
 
 
-        return res.status(
-            500
-        ).json({
+        return res.status(500).json({
 
             error:
                 "Failed to save answer"
@@ -765,7 +938,7 @@ module.exports = async (
 
 
 /* =========================
-   GET MEAL NAME
+   GET MEAL
 ========================= */
 
 function getMealFromNotification(
@@ -814,5 +987,28 @@ function getMealFromNotification(
 
 
     return "meal";
+
+}
+
+
+/* =========================
+   CAPITALIZE MEAL
+========================= */
+
+function capitalizeMeal(
+    meal
+) {
+
+    if (!meal) {
+
+        return "Meal";
+
+    }
+
+
+    return (
+        meal.charAt(0).toUpperCase() +
+        meal.slice(1)
+    );
 
 }
