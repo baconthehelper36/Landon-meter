@@ -14,7 +14,6 @@ const REDIS_TOKEN =
     process.env.KV_REST_API_TOKEN;
 
 async function redisCommand(command) {
-
     const response = await fetch(
         REDIS_URL,
         {
@@ -32,7 +31,8 @@ async function redisCommand(command) {
         }
     );
 
-    const data = await response.json();
+    const data =
+        await response.json();
 
     if (!response.ok || data.error) {
         throw new Error(
@@ -46,7 +46,6 @@ async function redisCommand(command) {
 
 
 async function getRedis(key) {
-
     const result =
         await redisCommand([
             "GET",
@@ -61,18 +60,7 @@ async function getRedis(key) {
 }
 
 
-async function setRedis(key, value) {
-
-    await redisCommand([
-        "SET",
-        key,
-        JSON.stringify(value)
-    ]);
-}
-
-
 async function getSubscriptions(username) {
-
     return (
         await getRedis(
             "push:" + username
@@ -85,7 +73,6 @@ async function sendPush(
     username,
     notification
 ) {
-
     const subscriptions =
         await getSubscriptions(
             username
@@ -97,13 +84,10 @@ async function sendPush(
         const subscription
         of subscriptions
     ) {
-
         try {
-
             await webpush.sendNotification(
                 subscription,
                 JSON.stringify({
-
                     title:
                         notification.title,
 
@@ -115,7 +99,6 @@ async function sendPush(
 
                     url:
                         "/"
-
                 })
             );
 
@@ -124,7 +107,6 @@ async function sendPush(
             });
 
         } catch (error) {
-
             console.error(
                 "Push error:",
                 error.message
@@ -135,9 +117,7 @@ async function sendPush(
                 error:
                     error.message
             });
-
         }
-
     }
 
     return results;
@@ -145,7 +125,6 @@ async function sendPush(
 
 
 function getIndonesiaTime() {
-
     const parts =
         new Intl.DateTimeFormat(
             "en-US",
@@ -174,23 +153,17 @@ function getIndonesiaTime() {
     for (
         const part of parts
     ) {
-
         result[
             part.type
         ] = part.value;
-
     }
 
     return result;
 }
 
 
-function createFoodNotification(
-    type
-) {
-
+function createFoodNotification(type) {
     const titles = {
-
         breakfast:
             "Did you eat breakfast yet?",
 
@@ -199,11 +172,9 @@ function createFoodNotification(
 
         dinner:
             "Did you eat dinner yet?"
-
     };
 
     const mamaTitles = {
-
         breakfast:
             "Send Notification to Landon",
 
@@ -212,11 +183,9 @@ function createFoodNotification(
 
         dinner:
             "Send Notification to Landon"
-
     };
 
     const mamaBodies = {
-
         breakfast:
             "Did Landon Eat Breakfast Yet?",
 
@@ -225,7 +194,6 @@ function createFoodNotification(
 
         dinner:
             "Did Landon Eat Dinner Yet?"
-
     };
 
     const id =
@@ -234,7 +202,6 @@ function createFoodNotification(
         Date.now();
 
     return {
-
         id,
 
         type:
@@ -263,45 +230,36 @@ function createFoodNotification(
 
         createdAt:
             new Date().toISOString()
-
     };
-
 }
 
 
+/*
+ * Save notification into the Redis list.
+ *
+ * Newest notification goes first.
+ */
 async function createNotification(
     notification
 ) {
-
-    const notifications =
-        (
-            await getRedis(
-                "notifications"
-            )
-        ) || [];
-
-    notifications.push(
-        notification
-    );
-
-    const recent =
-        notifications.slice(
-            -100
-        );
-
-    await setRedis(
+    await redisCommand([
+        "LPUSH",
         "notifications",
-        recent
-    );
+        JSON.stringify(notification)
+    ]);
 
-    return recent;
+    await redisCommand([
+        "LTRIM",
+        "notifications",
+        "0",
+        "99"
+    ]);
+
+    return notification;
 }
 
 
-async function sendFoodNotification(
-    type
-) {
-
+async function sendFoodNotification(type) {
     const notification =
         createFoodNotification(
             type
@@ -321,9 +279,7 @@ async function sendFoodNotification(
 
 
 async function sendMondayReminder() {
-
     const notification = {
-
         id:
             "monday-reminder-" +
             Date.now(),
@@ -342,7 +298,6 @@ async function sendMondayReminder() {
 
         createdAt:
             new Date().toISOString()
-
     };
 
     await createNotification(
@@ -362,7 +317,6 @@ module.exports = async (
     req,
     res
 ) => {
-
     try {
 
         /*
@@ -383,14 +337,10 @@ module.exports = async (
                 test !== "lunch" &&
                 test !== "dinner"
             ) {
-
                 return res.status(400).json({
-
                     error:
                         "Test must be breakfast, lunch, or dinner."
-
                 });
-
             }
 
             const notification =
@@ -399,7 +349,6 @@ module.exports = async (
                 );
 
             return res.status(200).json({
-
                 success:
                     true,
 
@@ -407,9 +356,7 @@ module.exports = async (
                     true,
 
                 notification
-
             });
-
         }
 
 
@@ -432,23 +379,21 @@ module.exports = async (
         let notification =
             null;
 
+        const weekdayNumber = {
+            Mon: 1,
+            Tue: 2,
+            Wed: 3,
+            Thu: 4,
+            Fri: 5,
+            Sat: 6,
+            Sun: 0
+        }[weekday];
+
 
         /*
          * Monday-Friday
          * 5:50 AM
          */
-
-        const weekdayNumber =
-            {
-                Mon: 1,
-                Tue: 2,
-                Wed: 3,
-                Thu: 4,
-                Fri: 5,
-                Sat: 6,
-                Sun: 0
-            }[weekday];
-
 
         if (
             weekdayNumber >= 1 &&
@@ -456,12 +401,10 @@ module.exports = async (
             hour === 5 &&
             minute === 50
         ) {
-
             notification =
                 await sendFoodNotification(
                     "breakfast"
                 );
-
         }
 
 
@@ -475,10 +418,8 @@ module.exports = async (
             hour === 12 &&
             minute === 0
         ) {
-
             notification =
                 await sendMondayReminder();
-
         }
 
 
@@ -493,12 +434,10 @@ module.exports = async (
             hour === 12 &&
             minute === 0
         ) {
-
             notification =
                 await sendFoodNotification(
                     "lunch"
                 );
-
         }
 
 
@@ -513,17 +452,14 @@ module.exports = async (
             hour === 19 &&
             minute === 0
         ) {
-
             notification =
                 await sendFoodNotification(
                     "dinner"
                 );
-
         }
 
 
         return res.status(200).json({
-
             success:
                 true,
 
@@ -531,7 +467,6 @@ module.exports = async (
                 !!notification,
 
             notification
-
         });
 
     } catch (error) {
@@ -542,13 +477,9 @@ module.exports = async (
         );
 
         return res.status(500).json({
-
             error:
                 error.message ||
                 "Notification system error"
-
         });
-
     }
-
 };
